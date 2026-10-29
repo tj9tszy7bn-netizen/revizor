@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ревизор Pro — Инвентаризация Иловаси</title>
-    <!-- Telegram WebApp SDK -->
+    <title>Ревизор Pro — Enterprise</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS (Excel билан ишлаш учун) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- Chart.js (Инфографика учун) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; }
@@ -20,538 +16,542 @@
 </head>
 <body class="pb-20 select-none">
 
-    <!-- Юқори Шапка -->
-    <header class="bg-slate-900 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
-        <div>
-            <h1 class="text-lg font-bold flex items-center gap-2">📦 Ревизор <span class="bg-blue-600 text-xs px-2 py-0.5 rounded-full">PRO</span></h1>
-            <p class="text-xs text-slate-400" id="header-status">База юкланмаган</p>
+    <!-- 1. LOGIN EKRANI -->
+    <div id="screen-login" class="fixed inset-0 bg-slate-900 z-50 flex flex-col justify-between p-6 text-white">
+        <div class="pt-10 text-center">
+            <span class="text-4xl">📦</span>
+            <h1 class="text-2xl font-bold mt-2">Ревизор <span class="text-blue-500">PRO</span></h1>
+            <p class="text-xs text-slate-400 mt-1">Tizimga kirish uchun login va parolingizni kiriting</p>
         </div>
-        <button onclick="loadDemoData()" class="bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold px-3 py-2 rounded-lg shadow transition">
-            🚀 Демо синов
-        </button>
-    </header>
 
-    <!-- Асосий Контейнер -->
-    <main class="max-w-xl mx-auto p-3">
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 space-y-4 shadow-xl">
+            <div>
+                <label class="text-xs text-slate-400 font-medium">Login (faqat harflar)</label>
+                <input type="text" id="loginInput" placeholder="Masalan: yorqinbek" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500">
+            </div>
+            <div>
+                <label class="text-xs text-slate-400 font-medium">Parol (harf va sonlar)</label>
+                <input type="password" id="passInput" placeholder="••••••••" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500">
+            </div>
+            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-xl transition shadow-lg">Kirish</button>
+        </div>
 
-        <!-- 1-БЎЛИМ: БАЗА ВА ФАЙЛЛАР -->
-        <section id="tab-baza" class="space-y-4">
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <h2 class="font-bold text-slate-800 mb-1">1. Тизим қолдиғини юклаш (SAP / 1C)</h2>
-                <p class="text-xs text-slate-500 mb-3">Файлда: <b>Материал, Номи, Отдел, Учет_миқдор, Нарх</b> устунлари бўлиши керак.</p>
-                
-                <label class="flex flex-col items-center justify-center border-2 border-dashed border-blue-400 bg-blue-50/50 rounded-xl p-5 cursor-pointer hover:bg-blue-50 transition">
-                    <span class="text-2xl mb-1">📥</span>
-                    <span class="text-sm font-semibold text-blue-700">База Excel файлини танланг</span>
-                    <span class="text-xs text-slate-400 mt-0.5">.xlsx ёки .xls форматда</span>
-                    <input type="file" id="bazaFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleBazaUpload(event)">
-                </label>
+        <div class="text-center pb-4">
+            <button onclick="openAdminLoginModal()" class="text-xs text-slate-500 hover:text-slate-300 underline">⚙️ Admin paneli</button>
+        </div>
+    </div>
 
-                <div class="mt-3 flex justify-between items-center pt-2 border-t border-slate-100">
-                    <span class="text-xs text-slate-500">Намунавий файл керакми?</span>
-                    <button onclick="downloadTemplate()" class="text-xs text-blue-600 font-semibold hover:underline">📄 Шаблонни юклаб олиш</button>
-                </div>
+    <!-- 2. ADMIN PANELI EKRANI -->
+    <div id="screen-admin" class="fixed inset-0 bg-slate-900 z-50 hidden flex flex-col p-5 text-white overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-bold flex items-center gap-2">⚙️ Admin Paneli</h2>
+            <button onclick="closeAdminPanel()" class="text-xs bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">Chiqish</button>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Bo'lim 1: Do'kon qo'shish -->
+            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
+                <h3 class="font-bold text-sm text-blue-400">🏪 Do'kon qo'shish</h3>
+                <input type="text" id="admShopName" placeholder="Do'kon nomi (masalan: K150 Chirchiq)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                <input type="text" id="admShopLogin" placeholder="Login (faqat harflar)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                <input type="text" id="admShopPass" placeholder="Parol (harf va sonlar)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                <button onclick="adminAddShop()" class="w-full bg-emerald-600 font-bold text-xs py-2.5 rounded-xl">Do'kon qo'shish</button>
             </div>
 
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <h2 class="font-bold text-slate-800 mb-1">2. Тайёр Факт файлини юклаш (Ихтиёрий)</h2>
-                <p class="text-xs text-slate-500 mb-3">Агар саноқни Excel'да қилган бўлсангиз, бу ерга ташланг (ёки <b>"Локал саноқ"</b> бўлимида тўғридан-тўғри телефонда сананг).</p>
-                
-                <label class="flex items-center justify-center border border-slate-300 bg-slate-50 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition">
-                    <span class="text-sm font-medium text-slate-700">📤 Факт Excel файлини юклаш</span>
-                    <input type="file" id="faktFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleFaktUpload(event)">
-                </label>
+            <!-- Bo'lim 2: Administrator qo'shish -->
+            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
+                <h3 class="font-bold text-sm text-blue-400">👤 Administrator qo'shish</h3>
+                <select id="admSelectShopForAdmin" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                    <option value="">Do'konni tanlang...</option>
+                </select>
+                <input type="text" id="admAdminName" placeholder="Admin F.I.O yoki Logini" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                <input type="text" id="admAdminCode" placeholder="Maxsus Admin Kodi (masalan: 777)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                <button onclick="adminAddAdmin()" class="w-full bg-emerald-600 font-bold text-xs py-2.5 rounded-xl">Admin tayinlash</button>
             </div>
 
-            <!-- База ҳақида қисқача маълумот -->
-            <div id="bazaSummaryCard" class="hidden bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 rounded-2xl shadow-md">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs uppercase tracking-wider opacity-80">Юкланган база ҳолати</span>
-                    <span class="bg-white/20 text-xs px-2 py-0.5 rounded">Фаол</span>
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-center mt-3">
-                    <div class="bg-white/10 p-2 rounded-xl">
-                        <div class="text-xl font-bold" id="statSkuCount">0</div>
-                        <div class="text-[11px] opacity-80">Товар (SKU)</div>
-                    </div>
-                    <div class="bg-white/10 p-2 rounded-xl">
-                        <div class="text-xl font-bold" id="statOtdelCount">0</div>
-                        <div class="text-[11px] opacity-80">Отделлар</div>
-                    </div>
-                    <div class="bg-white/10 p-2 rounded-xl">
-                        <div class="text-sm font-bold truncate mt-1" id="statTotalSum">0</div>
-                        <div class="text-[11px] opacity-80 mt-0.5">Учет суммаси</div>
-                    </div>
-                </div>
+            <!-- Bo'lim 3: Parolni o'zgartirish -->
+            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
+                <h3 class="font-bold text-sm text-blue-400">🔑 Admin parolini o'zgartirish</h3>
+                <input type="password" id="admCurrPass" placeholder="Hozirgi parol" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                <input type="password" id="admNewPass" placeholder="Yangi parol" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                <input type="password" id="admConfirmPass" placeholder="Yangi parolni tasdiqlang" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                <button onclick="adminChangePassword()" class="w-full bg-blue-600 font-bold text-xs py-2.5 rounded-xl">Parolni o'zgartirish</button>
             </div>
-        </section>
 
-        <!-- 2-БЎЛИМ: ЛОКАЛ ИНВЕНТАРИЗАЦИЯ ВА БЛАНКЛАР -->
-        <section id="tab-lokal" class="hidden space-y-3">
-            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 space-y-3 sticky top-16 z-20">
-                <div class="flex gap-2">
-                    <select id="otdelSelect" onchange="renderLocalCountList()" class="w-full bg-slate-100 border-0 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500">
-                        <option value="ALL">Барча отделлар</option>
-                    </select>
-                    <button onclick="exportBlindBlank()" class="bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-xl whitespace-nowrap flex items-center gap-1 shadow-sm">
-                        📋 Слепой Excel
+            <!-- Ma'lumotlar ro'yxati -->
+            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                <h3 class="font-bold text-sm mb-2 text-slate-300">📋 Mavjud do'konlar va adminlar</h3>
+                <div id="adminShopsList" class="text-xs text-slate-400 space-y-1">Hali birorta do'kon yo'q.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASOSIY ILOVA INTERFEYSI -->
+    <div id="main-app" class="hidden">
+        <header class="bg-slate-900 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
+            <div>
+                <h1 class="text-sm font-bold flex items-center gap-1.5">📦 <span id="currentShopTitle">Do'kon</span></h1>
+                <p class="text-[11px] text-slate-400" id="header-status">Inventarizatsiyalar tarixi</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="loadDemoData()" class="bg-emerald-600 text-xs font-semibold px-2.5 py-1.5 rounded-lg">🚀 Dемо</button>
+                <button onclick="logout()" class="bg-red-600/80 text-xs font-semibold px-2.5 py-1.5 rounded-lg">Chiqish</button>
+            </div>
+        </header>
+
+        <main class="max-w-xl mx-auto p-3">
+            
+            <!-- 1. INVENTARIZATSIYALAR RO'YXATI VА TARIXI -->
+            <section id="tab-baza" class="space-y-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center space-y-3">
+                    <h2 class="font-bold text-slate-800 text-sm">Do'kon Inventarizatsiya Markazi</h2>
+                    <button onclick="promptNewInventory()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow transition text-sm flex items-center justify-center gap-2">
+                        <span>➕</span> Yangi inventarizatsiya boshlash
                     </button>
                 </div>
-                <input type="text" id="searchInput" oninput="renderLocalCountList()" placeholder="🔍 Материал код ёки товар номини ёзинг..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
-            </div>
 
-            <!-- Интерактив саноқ рўйхати -->
-            <div id="localCountContainer" class="space-y-2">
-                <p class="text-center text-slate-400 text-sm py-10">Аввал базани юкланг ёки "Демо синов" тугмасини босинг.</p>
-            </div>
-        </section>
-
-        <!-- 3-БЎЛИМ: СЛИЧИТЕЛЬНЫЙ ОТЧЁТ -->
-        <section id="tab-slich" class="hidden space-y-3">
-            <!-- Умумий Сальдо Карточкалари -->
-            <div class="grid grid-cols-3 gap-2">
-                <div class="bg-red-50 border border-red-200 p-3 rounded-2xl text-center">
-                    <div class="text-[11px] text-red-600 font-semibold">🔻 Камомат</div>
-                    <div class="text-sm font-bold text-red-700 mt-1" id="sumKamomat">0 сўм</div>
-                    <div class="text-[10px] text-red-500" id="cntKamomat">0 та SKU</div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                    <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">O'tkazilgan inventarizatsiyalar</h3>
+                    <div id="inventoryHistoryList" class="space-y-2">
+                        <p class="text-center text-slate-400 text-xs py-6">Hali birorta inventarizatsiya oʻtkazilmagan!</p>
+                    </div>
                 </div>
-                <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-center">
-                    <div class="text-[11px] text-emerald-600 font-semibold">🔺 Излишки</div>
-                    <div class="text-sm font-bold text-emerald-700 mt-1" id="sumIzlishka">0 сўм</div>
-                    <div class="text-[10px] text-emerald-500" id="cntIzlishka">0 та SKU</div>
+            </section>
+
+            <!-- 2. LOKAL SANOQ VA SKU QO'SHISH -->
+            <section id="tab-lokal" class="hidden space-y-3">
+                <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 space-y-3 sticky top-16 z-20">
+                    <div class="flex gap-2">
+                        <select id="otdelSelect" onchange="renderLocalCountList()" class="w-full bg-slate-100 border-0 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800">
+                            <option value="ALL">Барча отделлар</option>
+                        </select>
+                        <button onclick="openAddSkuModal()" class="bg-blue-600 text-white text-lg font-bold px-4 py-2 rounded-xl shadow-sm">+</button>
+                    </div>
+                    <input type="text" id="searchInput" oninput="renderLocalCountList()" placeholder="🔍 Qidirish..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
                 </div>
-                <div class="bg-slate-800 text-white p-3 rounded-2xl text-center">
-                    <div class="text-[11px] text-slate-300 font-semibold">⚖️ Соф Сальдо</div>
-                    <div class="text-sm font-bold mt-1" id="sumSaldo">0 сўм</div>
-                    <div class="text-[10px] text-slate-400" id="statusSaldo">Баланс</div>
+                <div id="localCountContainer" class="space-y-2">
+                    <p class="text-center text-slate-400 text-sm py-10">Faol inventarizatsiya mavjud emas.</p>
                 </div>
-            </div>
+            </section>
 
-            <!-- Филтр ва Excel юклаш -->
-            <div class="bg-white p-3 rounded-2xl shadow-sm flex flex-wrap gap-2 justify-between items-center">
-                <div class="flex gap-1 overflow-x-auto hide-scroll text-xs font-semibold">
-                    <button onclick="setSlichFilter('ALL')" id="flt-ALL" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white">Барчаси</button>
-                    <button onclick="setSlichFilter('MINUS')" id="flt-MINUS" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700">Камомат (-)</button>
-                    <button onclick="setSlichFilter('PLUS')" id="flt-PLUS" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700">Излишки (+)</button>
-                    <button onclick="setSlichFilter('PERESORT')" id="flt-PERESORT" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800">🔄 Пересорт</button>
+            <!-- 3. SLICHITELNIY / SOLISHTIRUV -->
+            <section id="tab-slich" class="hidden space-y-3">
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-red-50 border border-red-200 p-3 rounded-2xl text-center">
+                        <div class="text-[11px] text-red-600 font-semibold">🔻 Kamomat</div>
+                        <div class="text-xs font-bold text-red-700 mt-1" id="sumKamomat">0 so'm</div>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-center">
+                        <div class="text-[11px] text-emerald-600 font-semibold">🔺 Izlishka</div>
+                        <div class="text-xs font-bold text-emerald-700 mt-1" id="sumIzlishka">0 so'm</div>
+                    </div>
+                    <div class="bg-slate-800 text-white p-3 rounded-2xl text-center">
+                        <div class="text-[11px] text-slate-300 font-semibold">⚖️ Saldo</div>
+                        <div class="text-xs font-bold mt-1" id="sumSaldo">0 so'm</div>
+                    </div>
                 </div>
-                <button onclick="exportSlichitelniyExcel()" class="w-full mt-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 rounded-xl shadow flex justify-center items-center gap-1.5">
-                    📥 Сличительный Excel отчётни юклаб олиш
-                </button>
+                <button onclick="exportSlichitelniyExcel()" class="w-full bg-emerald-600 text-white text-xs font-bold py-3 rounded-xl shadow">📥 Sличительный Excel yuklab olish</button>
+                <div id="slichListContainer" class="space-y-2"></div>
+            </section>
+
+            <!-- 4. INFOGRAFIKA -->
+            <section id="tab-chart" class="hidden space-y-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm">
+                    <h3 class="font-bold text-slate-800 text-sm mb-3">📊 Statistik diagramma</h3>
+                    <canvas id="otdelChart" height="220"></canvas>
+                </div>
+            </section>
+
+        </main>
+
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around text-xs text-slate-500 z-30">
+            <button onclick="switchTab('baza')" id="nav-baza" class="flex-1 py-2.5 flex flex-col items-center tab-active">
+                <span class="text-lg">📁</span><span>Tarix</span>
+            </button>
+            <button onclick="switchTab('lokal')" id="nav-lokal" class="flex-1 py-2.5 flex flex-col items-center">
+                <span class="text-lg">📝</span><span>Sanoq</span>
+            </button>
+            <button onclick="switchTab('slich')" id="nav-slich" class="flex-1 py-2.5 flex flex-col items-center">
+                <span class="text-lg">⚖️</span><span>Solishtiruv</span>
+            </button>
+            <button onclick="switchTab('chart')" id="nav-chart" class="flex-1 py-2.5 flex flex-col items-center">
+                <span class="text-lg">📊</span><span>Statistika</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODAL: SKU Qo'shish (Qo'lda) -->
+    <div id="modalAddSku" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-sm space-y-3">
+            <h3 class="font-bold text-slate-800 text-sm">➕ Qo'lda mahsulot (SKU) qo'shish</h3>
+            <input type="text" id="newSkuBar" placeholder="Bar-kod / Material" class="w-full bg-slate-100 rounded-xl px-3 py-2 text-sm">
+            <input type="text" id="newSkuName" placeholder="Mahsulot nomi" class="w-full bg-slate-100 rounded-xl px-3 py-2 text-sm">
+            <input type="text" id="newSkuOtdel" placeholder="Bo'limi (Отдел)" class="w-full bg-slate-100 rounded-xl px-3 py-2 text-sm">
+            <input type="number" id="newSkuOstatka" placeholder="Ostatka (Uchet miqdor)" class="w-full bg-slate-100 rounded-xl px-3 py-2 text-sm">
+            <input type="number" id="newSkuPrice" placeholder="Narxi" class="w-full bg-slate-100 rounded-xl px-3 py-2 text-sm">
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeAddSkuModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs">Bekor qilish</button>
+                <button onclick="saveManualSku()" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-xl text-xs">Qo'shish</button>
             </div>
+        </div>
+    </div>
 
-            <!-- Солиштирув рўйхати -->
-            <div id="slichListContainer" class="space-y-2"></div>
-        </section>
+    <!-- MODAL: Yangi Inventarizatsiya turi -->
+    <div id="modalNewInv" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-sm space-y-3 text-center">
+            <h3 class="font-bold text-slate-800 text-sm">Assalomu alaykum! Qanday inventarizatsiya o'tkazamiz?</h3>
+            <button onclick="selectInvType('LOCAL')" class="w-full bg-blue-50 border border-blue-200 text-blue-700 font-bold py-3 rounded-xl text-xs">1) Mahalliy (Excel yoki Qo'lda)</button>
+            <button onclick="selectInvType('GLOBAL')" class="w-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold py-3 rounded-xl text-xs">2) Ommaviy / Umumiy (Faqat Excel)</button>
+            <button onclick="closeNewInvModal()" class="w-full text-slate-400 text-xs pt-2">Chiqish</button>
+        </div>
+    </div>
 
-        <!-- 4-БЎЛИМ: ИНФОГРАФИКА -->
-        <section id="tab-chart" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-2xl shadow-sm">
-                <h3 class="font-bold text-slate-800 text-sm mb-3">📊 Отделлар кесимида Камомат ва Излишки (сўмда)</h3>
-                <canvas id="otdelChart" height="220"></canvas>
-            </div>
+    <!-- MODAL: Excel yuklash (Mahalliy yoki Ommaviy uchun) -->
+    <div id="modalExcelUpload" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-sm space-y-3 text-center">
+            <h3 class="font-bold text-slate-800 text-sm" id="excelModalTitle">Excel fayl yuklash</h3>
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <button onclick="processUploadedExcel()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Yuklash va Boshlash</button>
+            <button onclick="closeExcelModal()" class="w-full text-slate-400 text-xs">Yopish</button>
+        </div>
+    </div>
 
-            <div class="bg-white p-4 rounded-2xl shadow-sm">
-                <h3 class="font-bold text-slate-800 text-sm mb-2">🚨 Топ-5 Энг катта камоматга учраган товарлар</h3>
-                <div id="topKamomatList" class="space-y-2 text-xs"></div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Пастки Навигация Менюси -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around text-xs text-slate-500 z-30">
-        <button onclick="switchTab('baza')" id="nav-baza" class="flex-1 py-2.5 flex flex-col items-center tab-active">
-            <span class="text-lg">📁</span>
-            <span class="mt-0.5">База</span>
-        </button>
-        <button onclick="switchTab('lokal')" id="nav-lokal" class="flex-1 py-2.5 flex flex-col items-center">
-            <span class="text-lg">📝</span>
-            <span class="mt-0.5">Локал саноқ</span>
-        </button>
-        <button onclick="switchTab('slich')" id="nav-slich" class="flex-1 py-2.5 flex flex-col items-center">
-            <span class="text-lg">⚖️</span>
-            <span class="mt-0.5">Сличительный</span>
-        </button>
-        <button onclick="switchTab('chart')" id="nav-chart" class="flex-1 py-2.5 flex flex-col items-center">
-            <span class="text-lg">📊</span>
-            <span class="mt-0.5">Инфографика</span>
-        </button>
-    </nav>
-
+    <!-- SCRIPT LOGIC -->
     <script>
-        // Telegram WebApp инициализацияси
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.expand();
-        }
+        // LocalStorage bazasi
+        let dbData = JSON.parse(localStorage.getItem('revizor_db')) || {
+            adminPass: 'Valiyev20',
+            shops: [], // {name, login, pass}
+            admins: [], // {shopName, name, code}
+            history: [] // {shopName, date, skuCount, correctedCount, totalSum, items}
+        };
 
-        let inventoryData = [];
-        let currentSlichFilter = 'ALL';
+        let currentShop = null;
+        let activeInventoryItems = [];
+        let activeInvType = 'LOCAL';
         let chartInstance = null;
 
-        // Вкладкаларни алмаштириш
-        function switchTab(tabName) {
+        // Login tekshiruvi
+        function handleLogin() {
+            const login = document.getElementById('loginInput').value.trim();
+            const pass = document.getElementById('passInput').value.trim();
+
+            const shop = dbData.shops.find(s => s.login === login && s.pass === pass);
+            if (shop) {
+                currentShop = shop;
+                document.getElementById('currentShopTitle').innerText = shop.name;
+                document.getElementById('screen-login').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                renderHistoryList();
+            } else {
+                alert("Login yoki parol xato! Yoki bunday do'kon mavjud emas.");
+            }
+        }
+
+        function logout() {
+            currentShop = null;
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('screen-login').classList.remove('hidden');
+        }
+
+        // Admin Paneli
+        function openAdminLoginModal() {
+            const pass = prompt("Admin paneli parolini kiriting:");
+            if (pass === dbData.adminPass) {
+                document.getElementById('screen-admin').classList.remove('hidden');
+                updateAdminPanelUI();
+            } else if (pass !== null) {
+                alert("Parol noto'g'ri!");
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('screen-admin').classList.add('hidden');
+        }
+
+        function adminAddShop() {
+            const name = document.getElementById('admShopName').value.trim();
+            const login = document.getElementById('admShopLogin').value.trim();
+            const pass = document.getElementById('admShopPass').value.trim();
+
+            if (!name || !login || !pass) { alert("Barcha maydonlarni to'ldiring!"); return; }
+            if (/[0-9]/.test(login)) { alert("Login faqat harflardan iborat bo'lishi kerak!"); return; }
+            if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) { alert("Parol harf va sonlardan tashkil topishi kerak!"); return; }
+
+            dbData.shops.push({ name, login, pass });
+            saveDB();
+            alert("Do'kon muvaffaqiyatli qo'shildi!");
+            updateAdminPanelUI();
+        }
+
+        function adminAddAdmin() {
+            const shopName = document.getElementById('admSelectShopForAdmin').value;
+            const name = document.getElementById('admAdminName').value.trim();
+            const code = document.getElementById('admAdminCode').value.trim();
+
+            if (!shopName || !name || !code) { alert("Ma'lumotlarni to'ldiring!"); return; }
+            dbData.admins.push({ shopName, name, code });
+            saveDB();
+            alert("Administrator tayinlandi!");
+            updateAdminPanelUI();
+        }
+
+        function adminChangePassword() {
+            const curr = document.getElementById('admCurrPass').value;
+            const nw = document.getElementById('admNewPass').value;
+            const conf = document.getElementById('admConfirmPass').value;
+
+            if (curr !== dbData.adminPass) { alert("Hozirgi parol xato!"); return; }
+            if (nw !== conf) { alert("Yangi parollar mos kelmadi!"); return; }
+            if (!/[a-zA-Z]/.test(nw) || !/[0-9]/.test(nw)) { alert("Parol harf va sonlardan tashkil topishi kerak!"); return; }
+
+            dbData.adminPass = nw;
+            saveDB();
+            alert("Admin paroli muvaffaqiyatli o'zgartirildi!");
+        }
+
+        function updateAdminPanelUI() {
+            const shopSelect = document.getElementById('admSelectShopForAdmin');
+            shopSelect.innerHTML = '<option value="">Do\'konni tanlang...</option>';
+            dbData.shops.forEach(s => {
+                shopSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+            });
+
+            const listDiv = document.getElementById('adminShopsList');
+            if (dbData.shops.length === 0) {
+                listDiv.innerHTML = "Hali birorta do'kon yo'q.";
+            } else {
+                listDiv.innerHTML = dbData.shops.map(s => `<div>🏪 <b>${s.name}</b> (Login: ${s.login})</div>`).join('');
+            }
+        }
+
+        function saveDB() {
+            localStorage.setItem('revizor_db', JSON.stringify(dbData));
+        }
+
+        // Navigatsiya
+        function switchTab(tab) {
             ['baza', 'lokal', 'slich', 'chart'].forEach(t => {
                 document.getElementById('tab-' + t).classList.add('hidden');
                 document.getElementById('nav-' + t).classList.remove('tab-active');
             });
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            document.getElementById('nav-' + tabName).classList.add('tab-active');
-
-            if (tabName === 'lokal') renderLocalCountList();
-            if (tabName === 'slich') renderSlichitelniy();
-            if (tabName === 'chart') renderCharts();
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            document.getElementById('nav-' + tab).classList.add('tab-active');
+            if (tab === 'lokal') renderLocalCountList();
+            if (tab === 'slich') renderSlichitelniy();
+            if (tab === 'chart') renderCharts();
         }
 
-        // Тайёр Демо маълумотларни юклаш (Синов учун)
-        function loadDemoData() {
-            inventoryData = [
-                { id: '10001', name: 'Сут Musaffo 1л 3.2%', otdel: 'Сут маҳсулотлари', uchet: 50, fakt: 45, price: 12500 },
-                { id: '10002', name: 'Қаймоқ AgroBravo 200г', otdel: 'Сут маҳсулотлари', uchet: 30, fakt: 30, price: 15000 },
-                { id: '10003', name: 'Пишлоқ Tilla 200г', otdel: 'Сут маҳсулотлари', uchet: 20, fakt: 23, price: 28000 },
-                { id: '10004', name: 'Coca-Cola 1.5л', otdel: 'Ичимликлар', uchet: 120, fakt: 112, price: 14000 },
-                { id: '10005', name: 'Fanta Апельсин 1.5л', otdel: 'Ичимликлар', uchet: 80, fakt: 88, price: 14000 },
-                { id: '10006', name: 'Сув Hydrolife 1.5л газсиз', otdel: 'Ичимликлар', uchet: 90, fakt: 85, price: 5000 },
-                { id: '10007', name: 'Шоколад Alpen Gold Сутли', otdel: 'Қандолат', uchet: 45, fakt: 40, price: 11000 },
-                { id: '10008', name: 'Шоколад Alpen Gold Ёнғоқли', otdel: 'Қандолат', uchet: 40, fakt: 45, price: 11000 },
-                { id: '10009', name: 'Кунгабоқар ёғи Затея 1л', otdel: 'Бакалея', uchet: 60, fakt: 57, price: 19000 },
-                { id: '10010', name: 'Чой Ahmad Earl Grey 100г', otdel: 'Бакалея', uchet: 25, fakt: 26, price: 18500 }
-            ];
-            updateSummaryUI();
-            populateOtdelDropdown();
-            switchTab('slich');
-        }
-
-        // База статистикасини янгилаш
-        function updateSummaryUI() {
-            const otdels = [...new Set(inventoryData.map(i => i.otdel))];
-            const totalSum = inventoryData.reduce((acc, item) => acc + (item.uchet * item.price), 0);
-            
-            document.getElementById('header-status').innerText = `Юкланган: ${inventoryData.length} та товар (${otdels.length} та отдел)`;
-            document.getElementById('bazaSummaryCard').classList.remove('hidden');
-            document.getElementById('statSkuCount').innerText = inventoryData.length;
-            document.getElementById('statOtdelCount').innerText = otdels.length;
-            document.getElementById('statTotalSum').innerText = (totalSum / 1000000).toFixed(2) + ' млн';
-        }
-
-        function populateOtdelDropdown() {
-            const select = document.getElementById('otdelSelect');
-            const otdels = [...new Set(inventoryData.map(i => i.otdel))];
-            select.innerHTML = '<option value="ALL">🏬 Барча отделлар (' + inventoryData.length + ')</option>';
-            otdels.forEach(o => {
-                const count = inventoryData.filter(i => i.otdel === o).length;
-                select.innerHTML += `<option value="${o}">${o} (${count})</option>`;
-            });
-        }
-
-        // База Excel файлини ўқиш
-        function handleBazaUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(firstSheet);
-
-                if (rows.length === 0) {
-                    alert("Файл бўш!"); return;
-                }
-
-                inventoryData = rows.map((r, idx) => ({
-                    id: String(r['Материал'] || r['Артикул'] || r['Код'] || (idx + 1)),
-                    name: String(r['Номи'] || r['Краткий текст материала'] || r['Товар'] || 'Номсиз товар'),
-                    otdel: String(r['Отдел'] || r['Бўлим'] || r['Группа'] || 'Умумий бўлим'),
-                    uchet: parseFloat(r['Учет_миқдор'] || r['Учет'] || r['Свободно используемый запас'] || 0),
-                    fakt: parseFloat(r['Факт_миқдор'] !== undefined ? r['Факт_миқдор'] : (r['Учет_миқдор'] || 0)),
-                    price: parseFloat(r['Нарх'] || r['Цена'] || 0)
-                }));
-
-                updateSummaryUI();
-                populateOtdelDropdown();
-                alert("✅ База муваффақиятли юкланди! Энди 'Локал саноқ' ёки 'Сличительный' бўлимига ўтинг.");
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        // Факт Excel файлини ўқиш
-        function handleFaktUpload(event) {
-            if (inventoryData.length === 0) {
-                alert("Аввал асосий База файлини юкланг!"); return;
+        // Inventarizatsiya boshlash (Admin kodi so'raladi)
+        function promptNewInventory() {
+            const code = prompt("Administrator kodini kiriting:");
+            const admin = dbData.admins.find(a => a.shopName === currentShop.name && a.code === code);
+            if (admin || code === "777") { // 777 master code yoki bazadagi admin kodi
+                document.getElementById('modalNewInv').classList.remove('hidden');
+            } else {
+                alert("Admin kodi xato yoki sizda huquq yo'q!");
             }
-            const file = event.target.files[0];
-            if (!file) return;
+        }
+
+        function closeNewInvModal() { document.getElementById('modalNewInv').classList.add('hidden'); }
+
+        function selectInvType(type) {
+            activeInvType = type;
+            closeNewInvModal();
+            document.getElementById('excelModalTitle').innerText = type === 'LOCAL' ? 'Mahalliy inventarizatsiya (Excel)' : 'Ommaviy inventarizatsiya (Excel)';
+            document.getElementById('modalExcelUpload').classList.remove('hidden');
+        }
+
+        function closeExcelModal() { document.getElementById('modalExcelUpload').classList.add('hidden'); }
+
+        function processUploadedExcel() {
+            const fileInput = document.getElementById('excelFileInput');
+            if (!fileInput.files[0]) { alert("Fayl tanlang!"); return; }
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
                 const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 
-                const faktMap = {};
-                rows.forEach(r => {
-                    const id = String(r['Материал'] || r['Артикул'] || r['Код'] || '');
-                    const qty = parseFloat(r['Факт_миқдор'] || r['Факт'] || 0);
-                    if (id) faktMap[id] = (faktMap[id] || 0) + qty;
-                });
+                activeInventoryItems = rows.map((r, idx) => ({
+                    id: String(r['Материал'] || r['Артикул'] || r['Код'] || (idx + 1)),
+                    name: String(r['Номи'] || r['Товар'] || 'Nomsiz'),
+                    otdel: String(r['Отдел'] || r['Bo\'lim'] || 'Umumiy'),
+                    uchet: parseFloat(r['Учет_миқдор'] || r['Uchet'] || 0),
+                    fakt: parseFloat(r['Факт_миқдор'] || r['Uchet'] || 0),
+                    price: parseFloat(r['Нарх'] || r['Narx'] || 0)
+                }));
 
-                inventoryData.forEach(item => {
-                    if (faktMap[item.id] !== undefined) {
-                        item.fakt = faktMap[item.id];
-                    }
-                });
-
-                switchTab('slich');
+                closeExcelModal();
+                populateOtdelDropdown();
+                switchTab('lokal');
+                alert("Inventarizatsiya bazasi yuklandi!");
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(fileInput);
         }
 
-        // Локал инвентаризация рўйхатини чизиш
+        // Qo'lda SKU qo'shish
+        function openAddSkuModal() { document.getElementById('modalAddSku').classList.remove('hidden'); }
+        function closeAddSkuModal() { document.getElementById('modalAddSku').classList.add('hidden'); }
+
+        function saveManualSku() {
+            const id = document.getElementById('newSkuBar').value.trim();
+            const name = document.getElementById('newSkuName').value.trim();
+            const otdel = document.getElementById('newSkuOtdel').value.trim();
+            const uchet = parseFloat(document.getElementById('newSkuOstatka').value) || 0;
+            const price = parseFloat(document.getElementById('newSkuPrice').value) || 0;
+
+            if (!id || !name) { alert("Bar-kod va nomini kiriting!"); return; }
+
+            activeInventoryItems.push({ id, name, otdel, uchet, fakt: uchet, price });
+            closeAddSkuModal();
+            populateOtdelDropdown();
+            renderLocalCountList();
+            alert("Mahsulot qo'shildi!");
+        }
+
+        function populateOtdelDropdown() {
+            const select = document.getElementById('otdelSelect');
+            const otdels = [...new Set(activeInventoryItems.map(i => i.otdel))];
+            select.innerHTML = '<option value="ALL">Барча отделлар</option>';
+            otdels.forEach(o => { select.innerHTML += `<option value="${o}">${o}</option>`; });
+        }
+
         function renderLocalCountList() {
             const container = document.getElementById('localCountContainer');
-            if (inventoryData.length === 0) return;
-
-            const selectedOtdel = document.getElementById('otdelSelect').value;
+            if (activeInventoryItems.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-10">Faol inventarizatsiya mavjud emas.</p>';
+                return;
+            }
+            const selOtdel = document.getElementById('otdelSelect').value;
             const query = document.getElementById('searchInput').value.toLowerCase();
 
-            const filtered = inventoryData.filter(item => {
-                const matchOtdel = selectedOtdel === 'ALL' || item.otdel === selectedOtdel;
-                const matchQuery = item.name.toLowerCase().includes(query) || item.id.toLowerCase().includes(query);
-                return matchOtdel && matchQuery;
-            });
+            const filtered = activeInventoryItems.filter(i => (selOtdel === 'ALL' || i.otdel === selOtdel) && i.name.toLowerCase().includes(query));
 
             container.innerHTML = filtered.map(item => `
                 <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center">
-                    <div class="pr-2">
-                        <div class="text-[11px] font-mono text-slate-400">#${item.id} • ${item.otdel}</div>
-                        <div class="text-sm font-semibold text-slate-800">${item.name}</div>
-                        <div class="text-xs text-slate-500 mt-0.5">Нарх: ${item.price.toLocaleString()} сўм</div>
+                    <div>
+                        <div class="text-[10px] text-slate-400">#${item.id} • ${item.otdel}</div>
+                        <div class="text-xs font-bold text-slate-800">${item.name}</div>
                     </div>
-                    <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
-                        <button onclick="changeFakt('${item.id}', -1)" class="w-8 h-8 rounded-lg bg-white shadow text-slate-700 font-bold text-lg active:scale-95">-</button>
-                        <input type="number" value="${item.fakt}" onchange="setFaktDirectly('${item.id}', this.value)" class="w-14 text-center bg-transparent font-bold text-sm focus:outline-none">
-                        <button onclick="changeFakt('${item.id}', 1)" class="w-8 h-8 rounded-lg bg-blue-600 shadow text-white font-bold text-lg active:scale-95">+</button>
+                    <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                        <button onclick="changeQty('${item.id}', -1)" class="w-7 h-7 bg-white rounded font-bold">-</button>
+                        <input type="number" value="${item.fakt}" onchange="setQty('${item.id}', this.value)" class="w-12 text-center bg-transparent text-xs font-bold">
+                        <button onclick="changeQty('${item.id}', 1)" class="w-7 h-7 bg-blue-600 text-white rounded font-bold">+</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function changeFakt(id, delta) {
-            const item = inventoryData.find(i => i.id === id);
-            if (item) {
-                item.fakt = Math.max(0, Number(item.fakt) + delta);
-                renderLocalCountList();
+        function changeQty(id, delta) {
+            const item = activeInventoryItems.find(i => i.id === id);
+            if (item) { item.fakt = Math.max(0, item.fakt + delta); renderLocalCountList(); saveActiveToHistory(); }
+        }
+
+        function setQty(id, val) {
+            const item = activeInventoryItems.find(i => i.id === id);
+            if (item) { item.fakt = Math.max(0, parseFloat(val) || 0); saveActiveToHistory(); }
+        }
+
+        function saveActiveToHistory() {
+            if (activeInventoryItems.length === 0) return;
+            const skuCount = activeInventoryItems.length;
+            const correctedCount = activeInventoryItems.filter(i => i.fakt !== i.uchet).length;
+            const totalSum = activeInventoryItems.reduce((acc, i) => acc + ((i.fakt - i.uchet) * i.price), 0);
+            
+            // Tarixga saqlash yoki yangilash
+            const dateStr = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            let existing = dbData.history.find(h => h.shopName === currentShop.name && h.active);
+            if (!existing) {
+                existing = { shopName: currentShop.name, date: dateStr, skuCount, correctedCount, totalSum, items: activeInventoryItems, active: true };
+                dbData.history.push(existing);
+            } else {
+                existing.skuCount = skuCount;
+                existing.correctedCount = correctedCount;
+                existing.totalSum = totalSum;
+                existing.items = activeInventoryItems;
             }
+            saveDB();
         }
 
-        function setFaktDirectly(id, val) {
-            const item = inventoryData.find(i => i.id === id);
-            if (item) item.fakt = Math.max(0, parseFloat(val) || 0);
+        function renderHistoryList() {
+            const container = document.getElementById('inventoryHistoryList');
+            const shopHistories = dbData.history.filter(h => h.shopName === currentShop.name);
+
+            if (shopHistories.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-xs py-6">Hali birorta inventarizatsiya oʻtkazilmagan!</p>';
+                return;
+            }
+
+            container.innerHTML = shopHistories.map(h => `
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1">
+                    <div class="flex justify-between font-bold text-slate-800">
+                        <span>🏪 ${h.shopName}</span>
+                        <span class="text-blue-600">${h.date}</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1 pt-1 text-[11px] text-slate-600">
+                        <div>SKU: <b>${h.skuCount}</b></div>
+                        <div>Korreksiya: <b>${h.correctedCount}</b></div>
+                        <div>Summa: <b class="${h.totalSum >= 0 ? 'text-emerald-600':'text-red-600'}">${h.totalSum.toLocaleString()} so'm</b></div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // Пересорт эҳтимоли бор товарларни аниқлаш (бир отделдаги ўхшаш нархли минус ва плюс)
-        function findPeresortIds() {
-            const minusItems = inventoryData.filter(i => (i.fakt - i.uchet) < 0);
-            const plusItems = inventoryData.filter(i => (i.fakt - i.uchet) > 0);
-            const peresortSet = new Set();
-
-            minusItems.forEach(m => {
-                plusItems.forEach(p => {
-                    const priceDiffRatio = Math.abs(m.price - p.price) / (m.price || 1);
-                    if (m.otdel === p.otdel && priceDiffRatio <= 0.25) {
-                        peresortSet.add(m.id);
-                        peresortSet.add(p.id);
-                    }
-                });
-            });
-            return peresortSet;
-        }
-
-        function setSlichFilter(flt) {
-            currentSlichFilter = flt;
-            ['ALL', 'MINUS', 'PLUS', 'PERESORT'].forEach(k => {
-                const btn = document.getElementById('flt-' + k);
-                btn.className = (k === flt) 
-                    ? "px-3 py-1.5 rounded-lg bg-blue-600 text-white" 
-                    : "px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700";
-            });
-            renderSlichitelniy();
-        }
-
-        // Сличительный ведомостни ҳисоблаш ва чизиш
         function renderSlichitelniy() {
-            if (inventoryData.length === 0) return;
-
-            let totalKamomat = 0, cntKamomat = 0;
-            let totalIzlishka = 0, cntIzlishka = 0;
-            const peresortIds = findPeresortIds();
-
-            inventoryData.forEach(item => {
-                const diffQty = item.fakt - item.uchet;
-                const diffSum = diffQty * item.price;
-                if (diffQty < 0) { totalKamomat += diffSum; cntKamomat++; }
-                if (diffQty > 0) { totalIzlishka += diffSum; cntIzlishka++; }
+            if (activeInventoryItems.length === 0) return;
+            let kamomat = 0, izlishka = 0;
+            activeInventoryItems.forEach(i => {
+                const diff = (i.fakt - i.uchet) * i.price;
+                if (diff < 0) kamomat += diff;
+                if (diff > 0) izlishka += diff;
             });
+            const saldo = kamomat + izlishka;
 
-            const netSaldo = totalKamomat + totalIzlishka;
-
-            document.getElementById('sumKamomat').innerText = totalKamomat.toLocaleString() + ' сўм';
-            document.getElementById('cntKamomat').innerText = cntKamomat + ' та SKU';
-            document.getElementById('sumIzlishka').innerText = '+' + totalIzlishka.toLocaleString() + ' сўм';
-            document.getElementById('cntIzlishka').innerText = cntIzlishka + ' та SKU';
-            document.getElementById('sumSaldo').innerText = (netSaldo > 0 ? '+' : '') + netSaldo.toLocaleString() + ' сўм';
-
-            const filtered = inventoryData.filter(item => {
-                const diff = item.fakt - item.uchet;
-                if (currentSlichFilter === 'MINUS') return diff < 0;
-                if (currentSlichFilter === 'PLUS') return diff > 0;
-                if (currentSlichFilter === 'PERESORT') return peresortIds.has(item.id);
-                return true;
-            });
+            document.getElementById('sumKamomat').innerText = kamomat.toLocaleString() + " so'm";
+            document.getElementById('sumIzlishka').innerText = "+" + izlishka.toLocaleString() + " so'm";
+            document.getElementById('sumSaldo').innerText = saldo.toLocaleString() + " so'm";
 
             const container = document.getElementById('slichListContainer');
-            container.innerHTML = filtered.map(item => {
-                const diffQty = item.fakt - item.uchet;
-                const diffSum = diffQty * item.price;
-                const isPeresort = peresortIds.has(item.id);
-
-                let cardStyle = "bg-white border-slate-100";
-                let badge = `<span class="text-xs font-bold text-slate-500">Норма (0)</span>`;
-
-                if (diffQty < 0) {
-                    cardStyle = "bg-red-50/70 border-red-200";
-                    badge = `<span class="text-xs font-bold text-red-600">${diffQty} дона (${diffSum.toLocaleString()} сўм)</span>`;
-                } else if (diffQty > 0) {
-                    cardStyle = "bg-emerald-50/70 border-emerald-200";
-                    badge = `<span class="text-xs font-bold text-emerald-600">+${diffQty} дона (+${diffSum.toLocaleString()} сўм)</span>`;
-                }
-
+            container.innerHTML = activeInventoryItems.map(i => {
+                const diff = i.fakt - i.uchet;
+                const sum = diff * i.price;
+                if (diff === 0) return '';
                 return `
-                    <div class="p-3 rounded-xl border shadow-sm ${cardStyle}">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-[11px] font-mono text-slate-500">#${item.id} • ${item.otdel}</span>
-                                ${isPeresort ? '<span class="ml-1 bg-amber-200 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded">🔄 Эҳтимолий пересорт</span>' : ''}
-                                <div class="text-sm font-bold text-slate-800 mt-0.5">${item.name}</div>
-                            </div>
-                            ${badge}
-                        </div>
-                        <div class="flex justify-between text-xs text-slate-600 mt-2 pt-2 border-t border-black/5">
-                            <span>Учет: <b>${item.uchet}</b></span>
-                            <span>Факт: <b>${item.fakt}</b></span>
-                            <span>Нарх: ${item.price.toLocaleString()}</span>
-                        </div>
+                    <div class="p-2.5 rounded-xl border text-xs ${diff < 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'} flex justify-between">
+                        <div><b>${i.name}</b> (${i.otdel})</div>
+                        <div><b>${diff > 0 ? '+' : ''}${diff} dona</b> (${sum.toLocaleString()} so'm)</div>
                     </div>
                 `;
             }).join('');
         }
 
-        // Инфографика ва Топ камоматларни чизиш
-        function renderCharts() {
-            if (inventoryData.length === 0) return;
+        function exportSlichitelniyExcel() {
+            if (activeInventoryItems.length === 0) { alert("Ma'lumot yo'q!"); return; }
+            const rows = activeInventoryItems.map(i => ({
+                'Material': i.id, 'Nomi': i.name, 'Otdel': i.otdel, 'Uchet': i.uchet, 'Fakt': i.fakt, 'Farq': i.fakt - i.uchet, 'Summa': (i.fakt - i.uchet) * i.price
+            }));
+            const ws = XLSX.utils.json_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Slichitelniy");
+            XLSX.writeFile(wb, "Slichitelniy_Otchet.xlsx");
+        }
 
-            const otdels = [...new Set(inventoryData.map(i => i.otdel))];
-            const kamomatByOtdel = otdels.map(o => {
-                return Math.abs(inventoryData.filter(i => i.otdel === o && (i.fakt - i.uchet) < 0)
-                    .reduce((acc, i) => acc + (i.fakt - i.uchet) * i.price, 0));
-            });
-            const izlishkaByOtdel = otdels.map(o => {
-                return inventoryData.filter(i => i.otdel === o && (i.fakt - i.uchet) > 0)
-                    .reduce((acc, i) => acc + (i.fakt - i.uchet) * i.price, 0);
-            });
+        function renderCharts() {
+            if (activeInventoryItems.length === 0) return;
+            const otdels = [...new Set(activeInventoryItems.map(i => i.otdel))];
+            const sums = otdels.map(o => activeInventoryItems.filter(i => i.otdel === o).reduce((acc, i) => acc + ((i.fakt - i.uchet) * i.price), 0));
 
             const ctx = document.getElementById('otdelChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
-
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: otdels,
-                    datasets: [
-                        { label: 'Камомат (-)', data: kamomatByOtdel, backgroundColor: '#ef4444', borderRadius: 6 },
-                        { label: 'Излишки (+)', data: izlishkaByOtdel, backgroundColor: '#10b981', borderRadius: 6 }
-                    ]
-                },
-                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                    datasets: [{ label: 'Bo\'limlar bo\'yicha farq (so\'m)', data: sums, backgroundColor: '#3b82f6' }]
+                }
             });
-
-            // Топ-5 камомат
-            const topMinus = [...inventoryData]
-                .filter(i => (i.fakt - i.uchet) < 0)
-                .sort((a, b) => ((a.fakt - a.uchet) * a.price) - ((b.fakt - b.uchet) * b.price))
-                .slice(0, 5);
-
-            document.getElementById('topKamomatList').innerHTML = topMinus.map((item, idx) => {
-                const diffQty = item.fakt - item.uchet;
-                const diffSum = diffQty * item.price;
-                return `
-                    <div class="flex justify-between items-center p-2 bg-red-50 rounded-lg">
-                        <div><b>${idx + 1}. ${item.name}</b> <span class="text-slate-400">(${item.otdel})</span></div>
-                        <div class="font-bold text-red-600">${diffQty} дона (${diffSum.toLocaleString()} сўм)</div>
-                    </div>
-                `;
-            }).join('') || '<p class="text-slate-400">Камоматлар йўқ 🎉</p>';
-        }
-
-        // EXCEL ЭКСПОРТ ФУНКЦИЯЛАРИ
-        function exportBlindBlank() {
-            if (inventoryData.length === 0) { alert("Аввал базани юкланг!"); return; }
-            const selectedOtdel = document.getElementById('otdelSelect').value;
-            const filtered = inventoryData.filter(i => selectedOtdel === 'ALL' || i.otdel === selectedOtdel);
-
-            const exportRows = filtered.map(i => ({
-                'Материал': i.id,
-                'Номи': i.name,
-                'Отдел': i.otdel,
-                'Факт_миқдор': '' // Ходимлар тўлдириши учун бўш
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(exportRows);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Локал_Бланк");
-            XLSX.writeFile(wb, `Blind_Blank_${selectedOtdel}.xlsx`);
-        }
-
-        function exportSlichitelniyExcel() {
-            if (inventoryData.length === 0) { alert("Аввал базани юкланг!"); return; }
-            const peresortIds = findPeresortIds();
-
-            const exportRows = inventoryData.map(i => {
-                const diffQty = i.fakt - i.uchet;
-                const diffSum = diffQty * i.price;
-                let status = 'Норма';
-                if (diffQty < 0) status = 'Камомат (Недостача)';
-                if (diffQty > 0) status = 'Ортиқча (Излишки)';
-
-                return {
-                    'Материал': i.id,
-                    'Номи': i.name,
-                    'Отдел': i.otdel,
-                    'Нарх': i.price,
-                    'Учет_миқдор': i.uchet,
-                    'Факт_миқдор': i.fakt,
-                    'Фарқ_миқдор': diffQty,
-                    'Фарқ_сумма': diffSum,
-                    'Ҳолат': status,
-                    'Пересорт_эҳтимоли': peresortIds.has(i.id) ? 'Ҳа (Текширилсин)' : 'Йўқ'
-                };
-            });
-
-            const ws = XLSX.utils.json_to_sheet(exportRows);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Сличительная_ведомость");
-            XLSX.writeFile(wb, `Slichitelniy_Otchet.xlsx`);
-        }
-
-        function downloadTemplate() {
-            const sample = [
-                { 'Материал': '10001', 'Номи': 'Сут Musaffo 1л', 'Отдел': 'Сут маҳсулотлари', 'Учет_миқдор': 50, 'Нарх': 12500 },
-                { 'Материал': '10002', 'Номи': 'Coca-Cola 1.5л', 'Отдел': 'Ичимликлар', 'Учет_миқдор': 100, 'Нарх': 14000 }
-            ];
-            const ws = XLSX.utils.json_to_sheet(sample);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "База_Шаблон");
-            XLSX.writeFile(wb, "Shablon_Baza.xlsx");
         }
     </script>
 </body>
