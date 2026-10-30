@@ -3,160 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ревизор Pro — Ultimate</title>
+    <title>Ревизор Pro — Ultra Edition</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f1f5f9; }
-        .tab-active { color: #2563eb; border-top: 3px solid #2563eb; font-weight: 700; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; }
+        .tab-active { color: #2563eb; border-top: 3px solid #2563eb; font-weight: 600; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="pb-24 select-none">
 
-    <!-- LOGIN -->
+    <!-- 1. LOGIN SAHIFASI -->
     <div id="screen-login" class="fixed inset-0 bg-slate-900 z-50 flex flex-col justify-between p-6 text-white">
-        <div class="pt-16 text-center space-y-2">
-            <div class="inline-block bg-blue-600 p-4 rounded-3xl text-3xl shadow-xl">📦</div>
-            <h1 class="text-2xl font-black">Ревизор <span class="text-blue-400">PRO</span></h1>
-            <p class="text-xs text-slate-400">Chirchiq Oʻrmon — K150</p>
+        <div class="pt-12 text-center space-y-2">
+            <div class="inline-block bg-blue-600 p-4 rounded-3xl shadow-lg text-2xl">📦</div>
+            <h1 class="text-2xl font-black tracking-wide">Ревизор <span class="text-blue-400">PRO</span></h1>
+            <p class="text-xs text-slate-400">Supermarket va Do'konlar uchun Inventarizatsiya Tizimi</p>
         </div>
-        <div class="bg-slate-800 p-5 rounded-3xl border border-slate-700 space-y-4 shadow-2xl">
+
+        <div class="bg-slate-800/80 backdrop-blur p-5 rounded-3xl border border-slate-700/80 space-y-4 shadow-2xl">
             <div>
-                <label class="text-[11px] text-slate-400 font-bold uppercase">Login</label>
-                <input type="text" id="loginInput" value="chirchiq" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white">
+                <label class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Do'kon Logini</label>
+                <input type="text" id="loginInput" placeholder="Masalan: korzinka" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500">
             </div>
             <div>
-                <label class="text-[11px] text-slate-400 font-bold uppercase">Parol</label>
-                <input type="password" id="passInput" value="korzinka123" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white">
+                <label class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Parol</label>
+                <input type="password" id="passInput" placeholder="••••••••" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500">
             </div>
-            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3.5 rounded-2xl shadow-lg text-sm">Tizimga kirish</button>
+            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3.5 rounded-2xl transition shadow-lg text-sm">Tizimga kirish</button>
         </div>
+
         <div class="text-center pb-6">
-            <button onclick="openAdmin()" class="text-xs text-slate-400 underline">⚙️ Admin Paneli (Valiyev20)</button>
+            <button onclick="openAdminPanel()" class="text-xs text-slate-400 hover:text-white transition underline font-medium">⚙️ Admin Paneli (Valiyev20)</button>
         </div>
     </div>
 
-    <!-- ADMIN -->
+    <!-- 2. ADMIN PANELI -->
     <div id="screen-admin" class="fixed inset-0 bg-slate-900 z-50 hidden flex flex-col p-5 text-white overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-base font-bold">⚙️ Admin Paneli</h2>
-            <button onclick="closeAdmin()" class="text-xs bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">Chiqish</button>
+            <h2 class="text-base font-bold flex items-center gap-2">⚙️ Admin Boshqaruvi</h2>
+            <button onclick="closeAdminPanel()" class="text-xs bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">Chiqish</button>
         </div>
-        <div class="bg-slate-800 p-4 rounded-3xl border border-slate-700 space-y-2">
-            <h3 class="font-bold text-xs text-blue-400 uppercase">Do'kon ma'lumotlari</h3>
-            <p class="text-xs text-slate-300">🏪 Chirchiq O'rmon (Login: chirchiq / Parol: korzinka123)</p>
+
+        <div class="space-y-4 max-w-md mx-auto w-full">
+            <div class="bg-slate-800 p-4 rounded-3xl border border-slate-700 space-y-3">
+                <h3 class="font-bold text-xs text-blue-400 uppercase">🏪 Yangi Do'kon Qo'shish</h3>
+                <input type="text" id="admShopName" placeholder="Do'kon nomi (K150 Chirchiq)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                <input type="text" id="admShopLogin" placeholder="Login (harflar)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                <input type="text" id="admShopPass" placeholder="Parol (harf va sonlar)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                <button onclick="adminAddShop()" class="w-full bg-emerald-600 font-bold text-xs py-2.5 rounded-xl shadow">Do'konni Saqlash</button>
+            </div>
+
+            <div class="bg-slate-800 p-4 rounded-3xl border border-slate-700">
+                <h3 class="font-bold text-xs mb-2 text-slate-300 uppercase">📋 Mavjud Do'konlar</h3>
+                <div id="adminShopsList" class="text-xs text-slate-400 space-y-1">Do'konlar mavjud emas.</div>
+            </div>
         </div>
     </div>
 
-    <!-- ASOSIY -->
+    <!-- 3. ASOSIY ILOVA INTERFEYSI -->
     <div id="main-app" class="hidden">
-        <header class="bg-slate-900 text-white p-4 sticky top-0 z-30 shadow flex justify-between items-center">
+        <header class="bg-slate-900 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
             <div>
-                <h1 class="text-sm font-bold flex items-center gap-1.5">🏪 Chirchiq O'rmon</h1>
-                <p class="text-[10px] text-slate-400">Tovarshunos: Yorqinbek</p>
+                <h1 class="text-sm font-bold flex items-center gap-1.5">🏪 <span id="currentShopTitle">Do'kon</span></h1>
+                <p class="text-[10px] text-slate-400">Bosh Tovarshunos Aссистенти</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="loadDemo()" class="bg-emerald-600 text-xs font-semibold px-2.5 py-1.5 rounded-xl shadow">🚀 Demo</button>
+                <button onclick="loadDemoData()" class="bg-emerald-600 text-xs font-semibold px-2.5 py-1.5 rounded-xl shadow">🚀 Demo</button>
                 <button onclick="logout()" class="bg-red-600 text-xs font-semibold px-2.5 py-1.5 rounded-xl shadow">Chiqish</button>
             </div>
         </header>
 
         <main class="max-w-xl mx-auto p-3 space-y-3">
-            <!-- TARIX -->
+            
+            <!-- TARIX VA YANGI INVENTARIZATSIYA -->
             <section id="tab-baza" class="space-y-3">
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 text-center space-y-3">
-                    <h2 class="font-bold text-slate-800 text-sm">Yangi Inventarizatsiya Boshlash</h2>
-                    <input type="file" id="excelFile" accept=".xlsx, .xls" class="hidden" onchange="uploadExcel(event)">
-                    <button onclick="document.getElementById('excelFile').click()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-2xl shadow text-xs">📁 Excel Faylni Yuklash (MB52)</button>
-                    <button onclick="startManual()" class="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-2xl shadow text-xs">✍️ Qo'lda Sanoqdan Boshlash</button>
+                    <h2 class="font-bold text-slate-800 text-sm">Yangi Inventarizatsiya Jarayoni</h2>
+                    <button onclick="startNewInventory()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-2xl shadow-md transition text-xs flex items-center justify-center gap-2">
+                        <span class="text-base">+</span> Yangi Inventarizatsiya Boshlash
+                    </button>
                 </div>
+
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-xs uppercase">O'tkazilgan Tarix</h3>
-                    <div id="historyList" class="space-y-2">
-                        <p class="text-center text-slate-400 text-xs py-6">Hali inventarizatsiya yoʻq!</p>
+                    <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">O'tkazilgan Inventarizatsiyalar Tarixi</h3>
+                    <div id="inventoryHistoryList" class="space-y-2">
+                        <p class="text-center text-slate-400 text-xs py-8">Hali birorta inventarizatsiya oʻtkazilmagan!</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SANOQ -->
+            <!-- LOKAL SANOQ -->
             <section id="tab-lokal" class="hidden space-y-3">
                 <div class="bg-white p-3 rounded-3xl shadow-sm border border-slate-100 space-y-2 sticky top-16 z-20">
                     <div class="flex gap-2">
-                        <select id="otdelSelect" onchange="renderItems()" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs font-semibold text-slate-800">
+                        <select id="otdelSelect" onchange="renderLocalCountList()" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs font-semibold text-slate-800">
                             <option value="ALL">Барча отделлар</option>
                         </select>
-                        <button onclick="openModal()" class="bg-blue-600 text-white text-xl font-bold px-4 py-2 rounded-2xl shadow">+</button>
+                        <button onclick="openAddSkuModal()" class="bg-blue-600 text-white text-xl font-bold px-4 py-2 rounded-2xl shadow">+</button>
                     </div>
-                    <input type="text" id="searchBox" oninput="renderItems()" placeholder="🔍 Qidirish..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
+                    <input type="text" id="searchInput" oninput="renderLocalCountList()" placeholder="🔍 Tovar yoki Kod bo'yicha qidirish..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
                 </div>
-                <div id="itemsContainer" class="space-y-2">
-                    <p class="text-center text-slate-400 text-xs py-12">Tovar mavjud emas.</p>
+                <div id="localCountContainer" class="space-y-2">
+                    <p class="text-center text-slate-400 text-xs py-12">Faol inventarizatsiya mavjud emas. Avval yangi jarayon boshlang!</p>
                 </div>
             </section>
 
-            <!-- SOLISHTIRUV -->
+            <!-- SOLISHTIRUV (SLICHITELNIY) -->
             <section id="tab-slich" class="hidden space-y-3">
                 <div class="grid grid-cols-3 gap-2">
                     <div class="bg-red-50 border border-red-200 p-3 rounded-3xl text-center shadow-sm">
                         <div class="text-[10px] text-red-600 font-bold uppercase">Kamomat</div>
-                        <div class="text-xs font-black text-red-700 mt-1" id="sumKam">0 so'm</div>
+                        <div class="text-xs font-black text-red-700 mt-1" id="sumKamomat">0 so'm</div>
                     </div>
                     <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-3xl text-center shadow-sm">
                         <div class="text-[10px] text-emerald-600 font-bold uppercase">Izlishka</div>
-                        <div class="text-xs font-black text-emerald-700 mt-1" id="sumIzi">0 so'm</div>
+                        <div class="text-xs font-black text-emerald-700 mt-1" id="sumIzlishka">0 so'm</div>
                     </div>
                     <div class="bg-slate-900 text-white p-3 rounded-3xl text-center shadow-sm">
                         <div class="text-[10px] text-slate-300 font-bold uppercase">Saldo</div>
-                        <div class="text-xs font-black mt-1" id="sumSal">0 so'm</div>
+                        <div class="text-xs font-black mt-1" id="sumSaldo">0 so'm</div>
                     </div>
                 </div>
-                <button onclick="exportExcel()" class="w-full bg-emerald-600 text-white text-xs font-bold py-3.5 rounded-2xl shadow">📥 Excel Hisobotini Yuklab Olish</button>
-                <div id="slichContainer" class="space-y-2"></div>
+                <button onclick="exportSlichitelniyExcel()" class="w-full bg-emerald-600 text-white text-xs font-bold py-3.5 rounded-2xl shadow-md">📥 Sличительный Excel Hisobotini Yuklab Olish</button>
+                <div id="slichListContainer" class="space-y-2"></div>
             </section>
 
             <!-- STATISTIKA -->
             <section id="tab-chart" class="hidden space-y-3">
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
-                    <h3 class="font-bold text-slate-800 text-xs mb-3 uppercase">📊 Bo'limlar Kesimida</h3>
-                    <canvas id="myChart" height="240"></canvas>
+                    <h3 class="font-bold text-slate-800 text-xs mb-3 uppercase">📊 Bo'limlar Kesimida Farq (So'm)</h3>
+                    <canvas id="otdelChart" height="240"></canvas>
                 </div>
             </section>
+
         </main>
 
+        <!-- PASTKI NAVIGATSIYA -->
         <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around text-[11px] text-slate-500 z-30 shadow-lg">
-            <button onclick="switchTab('baza')" id="nav-baza" class="flex-1 py-3 flex flex-col items-center tab-active"><span class="text-lg">📁</span><span>Tarix</span></button>
-            <button onclick="switchTab('lokal')" id="nav-lokal" class="flex-1 py-3 flex flex-col items-center"><span class="text-lg">📝</span><span>Sanoq</span></button>
-            <button onclick="switchTab('slich')" id="nav-slich" class="flex-1 py-3 flex flex-col items-center"><span class="text-lg">⚖️</span><span>Solishtiruv</span></button>
-            <button onclick="switchTab('chart')" id="nav-chart" class="flex-1 py-3 flex flex-col items-center"><span class="text-lg">📊</span><span>Statistika</span></button>
+            <button onclick="switchTab('baza')" id="nav-baza" class="flex-1 py-3 flex flex-col items-center tab-active">
+                <span class="text-lg">📁</span><span class="mt-0.5">Tarix</span>
+            </button>
+            <button onclick="switchTab('lokal')" id="nav-lokal" class="flex-1 py-3 flex flex-col items-center">
+                <span class="text-lg">📝</span><span class="mt-0.5">Sanoq</span>
+            </button>
+            <button onclick="switchTab('slich')" id="nav-slich" class="flex-1 py-3 flex flex-col items-center">
+                <span class="text-lg">⚖️</span><span class="mt-0.5">Solishtiruv</span>
+            </button>
+            <button onclick="switchTab('chart')" id="nav-chart" class="flex-1 py-3 flex flex-col items-center">
+                <span class="text-lg">📊</span><span class="mt-0.5">Statistika</span>
+            </button>
         </nav>
     </div>
 
-    <!-- MODAL -->
-    <div id="modalAdd" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <!-- MODAL: Qo'lda SKU qo'shish -->
+    <div id="modalAddSku" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl p-5 w-full max-w-sm space-y-3 shadow-2xl">
             <h3 class="font-bold text-slate-800 text-sm">➕ Qo'lda Tovar Qo'shish</h3>
-            <input type="text" id="mId" placeholder="Bar-kod" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
-            <input type="text" id="mName" placeholder="Tovar nomi" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
-            <input type="text" id="mOtdel" placeholder="Bo'limi" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
-            <input type="number" id="mUchet" placeholder="Baza Ostatkasi" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
-            <input type="number" id="mPrice" placeholder="Narxi" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="text" id="newSkuBar" placeholder="Bar-kod / Material" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="text" id="newSkuName" placeholder="Tovar nomi" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="text" id="newSkuOtdel" placeholder="Bo'limi (Masalan: Suv va Ichimliklar)" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="number" id="newSkuOstatka" placeholder="Baza Ostatkasi (Uchet)" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="number" id="newSkuPrice" placeholder="Narxi (So'm)" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
             <div class="flex gap-2 pt-2">
-                <button onclick="document.getElementById('modalAdd').classList.add('hidden')" class="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl text-xs">Bekor qilish</button>
-                <button onclick="saveItem()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-2xl text-xs">Qo'shish</button>
+                <button onclick="closeAddSkuModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl text-xs">Bekor qilish</button>
+                <button onclick="saveManualSku()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-2xl text-xs shadow">Qo'shish</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL: Inventarizatsiya turi (Mahalliy yoki Ommaviy) -->
+    <div id="modalNewInv" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-5 w-full max-w-sm space-y-3 text-center shadow-2xl">
+            <h3 class="font-bold text-slate-800 text-sm">Inventarizatsiya Turini Tanlang:</h3>
+            <button onclick="selectInvMode('excel')" class="w-full bg-blue-50 border border-blue-200 text-blue-700 font-bold py-3 rounded-2xl text-xs">📁 Excel Fayl Orqali Yuklash</button>
+            <button onclick="selectInvMode('manual')" class="w-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold py-3 rounded-2xl text-xs">✍️ Qo'lda Tovar Qo'shish (Sanoqdan boshlash)</button>
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="processExcel(event)">
+            <button onclick="closeNewInvModal()" class="w-full text-slate-400 text-xs pt-2">Chiqish</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIKASI -->
     <script>
-        let items = JSON.parse(localStorage.getItem('revizor_items')) || [];
-        let history = JSON.parse(localStorage.getItem('revizor_history')) || [];
-        let chartObj = null;
+        let db = JSON.parse(localStorage.getItem('revizor_ultra_db')) || {
+            shops: [{ name: 'K150 Chirchiq', login: 'chirchiq', pass: 'korzinka123' }],
+            history: []
+        };
+
+        let currentShop = null;
+        let activeItems = [];
+        let chartInstance = null;
 
         function handleLogin() {
-            const l = document.getElementById('loginInput').value.trim();
-            const p = document.getElementById('passInput').value.trim();
-            if (l === 'chirchiq' && p === 'korzinka123') {
+            const login = document.getElementById('loginInput').value.trim();
+            const pass = document.getElementById('passInput').value.trim();
+            const shop = db.shops.find(s => s.login === login && s.pass === pass);
+            
+            if (shop) {
+                currentShop = shop;
+                document.getElementById('currentShopTitle').innerText = shop.name;
                 document.getElementById('screen-login').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 renderHistory();
@@ -166,18 +214,38 @@
         }
 
         function logout() {
+            currentShop = null;
             document.getElementById('main-app').classList.add('hidden');
             document.getElementById('screen-login').classList.remove('hidden');
         }
 
-        function openAdmin() {
-            if (prompt("Admin parolini kiriting:") === 'Valiyev20') {
+        function openAdminPanel() {
+            const pin = prompt("Admin parolini kiriting:");
+            if (pin === 'Valiyev20') {
                 document.getElementById('screen-admin').classList.remove('hidden');
-            } else {
-                alert("Parol xato!");
+                updateAdminUI();
+            } else if (pin !== null) {
+                alert("Parol noto'g'ri!");
             }
         }
-        function closeAdmin() { document.getElementById('screen-admin').classList.add('hidden'); }
+
+        function closeAdminPanel() { document.getElementById('screen-admin').classList.add('hidden'); }
+
+        function adminAddShop() {
+            const name = document.getElementById('admShopName').value.trim();
+            const login = document.getElementById('admShopLogin').value.trim();
+            const pass = document.getElementById('admShopPass').value.trim();
+            if (!name || !login || !pass) { alert("Barcha maydonlarni to'ldiring!"); return; }
+            db.shops.push({ name, login, pass });
+            localStorage.setItem('revizor_ultra_db', JSON.stringify(db));
+            alert("Do'kon qo'shildi!");
+            updateAdminUI();
+        }
+
+        function updateAdminUI() {
+            const list = document.getElementById('adminShopsList');
+            list.innerHTML = db.shops.map(s => `<div class="bg-slate-900 p-2 rounded-xl">🏪 <b>${s.name}</b> (Login: ${s.login})</div>`).join('');
+        }
 
         function switchTab(tab) {
             ['baza', 'lokal', 'slich', 'chart'].forEach(t => {
@@ -186,28 +254,38 @@
             });
             document.getElementById('tab-' + tab).classList.remove('hidden');
             document.getElementById('nav-' + tab).classList.add('tab-active');
-            if (tab === 'lokal') renderItems();
-            if (tab === 'slich') renderSlich();
-            if (tab === 'chart') renderChart();
+            if (tab === 'lokal') renderLocalCountList();
+            if (tab === 'slich') renderSlichitelniy();
+            if (tab === 'chart') renderCharts();
         }
 
-        function startManual() {
-            items = [];
-            saveData();
-            updateOtdel();
-            switchTab('lokal');
+        function startNewInventory() {
+            document.getElementById('modalNewInv').classList.remove('hidden');
         }
 
-        function uploadExcel(e) {
+        function closeNewInvModal() { document.getElementById('modalNewInv').classList.add('hidden'); }
+
+        function selectInvMode(mode) {
+            if (mode === 'excel') {
+                document.getElementById('excelFileInput').click();
+            } else {
+                closeNewInvModal();
+                activeItems = [];
+                populateOtdelDropdown();
+                switchTab('lokal');
+            }
+        }
+
+        function processExcel(e) {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(evt) {
                 const data = new Uint8Array(evt.target.result);
-                const wb = XLSX.read(data, {type: 'array'});
-                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
                 
-                items = rows.map((r, idx) => ({
+                activeItems = rows.map((r, idx) => ({
                     id: String(r['Материал'] || r['Артикул'] || r['Код'] || (idx + 1)),
                     name: String(r['Номи'] || r['Товар'] || 'Nomsiz'),
                     otdel: String(r['Отдел'] || r['Bo\'lim'] || 'Umumiy'),
@@ -216,134 +294,148 @@
                     price: parseFloat(r['Нарх'] || r['Narx'] || 0)
                 }));
 
-                saveData();
-                updateOtdel();
+                closeNewInvModal();
+                populateOtdelDropdown();
                 switchTab('lokal');
-                addHistory();
+                saveToHistory();
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function openModal() { document.getElementById('modalAdd').classList.remove('hidden'); }
-        function saveItem() {
-            const id = document.getElementById('mId').value.trim();
-            const name = document.getElementById('mName').value.trim();
-            const otdel = document.getElementById('mOtdel').value.trim() || 'Umumiy';
-            const uchet = parseFloat(document.getElementById('mUchet').value) || 0;
-            const price = parseFloat(document.getElementById('mPrice').value) || 0;
-            if (!id || !name) { alert("Maydonlarni to'ldiring!"); return; }
-            
-            items.push({ id, name, otdel, uchet, fakt: uchet, price });
-            document.getElementById('modalAdd').classList.add('hidden');
-            saveData();
-            updateOtdel();
-            renderItems();
-            addHistory();
+        function openAddSkuModal() { document.getElementById('modalAddSku').classList.remove('hidden'); }
+        function closeAddSkuModal() { document.getElementById('modalAddSku').classList.add('hidden'); }
+
+        function saveManualSku() {
+            const id = document.getElementById('newSkuBar').value.trim();
+            const name = document.getElementById('newSkuName').value.trim();
+            const otdel = document.getElementById('newSkuOtdel').value.trim() || 'Umumiy';
+            const uchet = parseFloat(document.getElementById('newSkuOstatka').value) || 0;
+            const price = parseFloat(document.getElementById('newSkuPrice').value) || 0;
+
+            if (!id || !name) { alert("Bar-kod va nomini kiriting!"); return; }
+
+            activeItems.push({ id, name, otdel, uchet, fakt: uchet, price });
+            closeAddSkuModal();
+            populateOtdelDropdown();
+            renderLocalCountList();
+            saveToHistory();
         }
 
-        function updateOtdel() {
-            const sel = document.getElementById('otdelSelect');
-            const otdels = [...new Set(items.map(i => i.otdel))];
-            sel.innerHTML = '<option value="ALL">Барча отделлар</option>';
-            otdels.forEach(o => sel.innerHTML += `<option value="${o}">${o}</option>`);
+        function populateOtdelDropdown() {
+            const select = document.getElementById('otdelSelect');
+            const otdels = [...new Set(activeItems.map(i => i.otdel))];
+            select.innerHTML = '<option value="ALL">Барча отделлар</option>';
+            otdels.forEach(o => { select.innerHTML += `<option value="${o}">${o}</option>`; });
         }
 
-        function renderItems() {
-            const c = document.getElementById('itemsContainer');
-            if (items.length === 0) {
-                c.innerHTML = '<p class="text-center text-slate-400 text-xs py-12">Tovar mavjud emas.</p>';
+        function renderLocalCountList() {
+            const container = document.getElementById('localCountContainer');
+            if (activeItems.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-xs py-12">Faol inventarizatsiya mavjud emas. Yangi jarayon boshlang!</p>';
                 return;
             }
-            const sel = document.getElementById('otdelSelect').value;
-            const q = document.getElementById('searchBox').value.toLowerCase();
-            const filtered = items.filter(i => (sel === 'ALL' || i.otdel === sel) && i.name.toLowerCase().includes(q));
+            const selOtdel = document.getElementById('otdelSelect').value;
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = activeItems.filter(i => (selOtdel === 'ALL' || i.otdel === selOtdel) && i.name.toLowerCase().includes(query));
 
-            c.innerHTML = filtered.map(i => `
+            container.innerHTML = filtered.map(item => `
                 <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
                     <div>
-                        <div class="text-[10px] text-slate-400 font-mono">#${i.id} • ${i.otdel}</div>
-                        <div class="text-xs font-bold text-slate-800">${i.name}</div>
+                        <div class="text-[10px] text-slate-400 font-mono">#${item.id} • ${item.otdel}</div>
+                        <div class="text-xs font-bold text-slate-800">${item.name}</div>
                     </div>
                     <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
-                        <button onclick="changeQty('${i.id}', -1)" class="w-7 h-7 bg-white rounded-lg shadow-sm font-bold">-</button>
-                        <input type="number" value="${i.fakt}" onchange="setQty('${i.id}', this.value)" class="w-12 text-center bg-transparent text-xs font-black">
-                        <button onclick="changeQty('${i.id}', 1)" class="w-7 h-7 bg-blue-600 text-white rounded-xl shadow-sm font-bold">+</button>
+                        <button onclick="changeQty('${item.id}', -1)" class="w-7 h-7 bg-white rounded-lg shadow-sm font-bold text-slate-700">-</button>
+                        <input type="number" value="${item.fakt}" onchange="setQty('${item.id}', this.value)" class="w-12 text-center bg-transparent text-xs font-black">
+                        <button onclick="changeQty('${item.id}', 1)" class="w-7 h-7 bg-blue-600 rounded-xl shadow-sm font-bold text-white">+</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function changeQty(id, d) {
-            const it = items.find(x => x.id === id);
-            if (it) { it.fakt = Math.max(0, it.fakt + d); saveData(); renderItems(); addHistory(); }
+        function changeQty(id, delta) {
+            const item = activeItems.find(i => i.id === id);
+            if (item) { item.fakt = Math.max(0, item.fakt + delta); renderLocalCountList(); saveToHistory(); }
         }
+
         function setQty(id, val) {
-            const it = items.find(x => x.id === id);
-            if (it) { it.fakt = Math.max(0, parseFloat(val) || 0); saveData(); addHistory(); }
+            const item = activeItems.find(i => i.id === id);
+            if (item) { item.fakt = Math.max(0, parseFloat(val) || 0); saveToHistory(); }
         }
 
-        function saveData() { localStorage.setItem('revizor_items', JSON.stringify(items)); }
+        function saveToHistory() {
+            if (activeItems.length === 0) return;
+            const skuCount = activeItems.length;
+            const correctedCount = activeItems.filter(i => i.fakt !== i.uchet).length;
+            const totalSum = activeItems.reduce((acc, i) => acc + ((i.fakt - i.uchet) * i.price), 0);
+            const dateStr = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-        function addHistory() {
-            if (items.length === 0) return;
-            const sku = items.length;
-            const cor = items.filter(i => i.fakt !== i.uchet).length;
-            const sum = items.reduce((acc, i) => acc + ((i.fakt - i.uchet) * i.price), 0);
-            const dt = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
-            history = [{ shop: "Chirchiq O'rmon", dt, sku, cor, sum }];
-            localStorage.setItem('revizor_history', JSON.stringify(history));
+            let hist = db.history.find(h => h.shopName === currentShop.name && h.active);
+            if (!hist) {
+                hist = { shopName: currentShop.name, date: dateStr, skuCount, correctedCount, totalSum, items: activeItems, active: true };
+                db.history.push(hist);
+            } else {
+                hist.skuCount = skuCount;
+                hist.correctedCount = correctedCount;
+                hist.totalSum = totalSum;
+                hist.items = activeItems;
+            }
+            localStorage.setItem('revizor_ultra_db', JSON.stringify(db));
             renderHistory();
         }
 
         function renderHistory() {
-            const h = document.getElementById('historyList');
-            if (history.length === 0) {
-                h.innerHTML = '<p class="text-center text-slate-400 text-xs py-6">Hali inventarizatsiya yoʻq!</p>';
+            const container = document.getElementById('inventoryHistoryList');
+            const shopHist = db.history.filter(h => h.shopName === currentShop.name);
+            if (shopHist.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-xs py-8">Hali birorta inventarizatsiya oʻtkazilmagan!</p>';
                 return;
             }
-            h.innerHTML = history.map(x => `
-                <div class="bg-slate-50 p-3 rounded-2xl border text-xs space-y-1">
+            container.innerHTML = shopHist.map(h => `
+                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs space-y-1">
                     <div class="flex justify-between font-bold text-slate-800">
-                        <span>🏪 ${x.shop}</span><span class="text-blue-600">${x.dt}</span>
+                        <span>🏪 ${h.shopName}</span>
+                        <span class="text-blue-600">${h.date}</span>
                     </div>
                     <div class="grid grid-cols-3 gap-1 pt-1 text-[11px] text-slate-600">
-                        <div>SKU: <b>${x.sku}</b></div><div>Korr: <b>${x.cor}</b></div>
-                        <div>Summa: <b class="${x.sum >= 0 ? 'text-emerald-600':'text-red-600'}">${x.sum.toLocaleString()} so'm</b></div>
+                        <div>SKU: <b>${h.skuCount}</b></div>
+                        <div>Korreksiya: <b>${h.correctedCount}</b></div>
+                        <div>Summa: <b class="${h.totalSum >= 0 ? 'text-emerald-600':'text-red-600'}">${h.totalSum.toLocaleString()} so'm</b></div>
                     </div>
                 </div>
             `).join('');
         }
 
-        function renderSlich() {
-            if (items.length === 0) return;
-            let kam = 0, izi = 0;
-            items.forEach(i => {
+        function renderSlichitelniy() {
+            if (activeItems.length === 0) return;
+            let kamomat = 0, izlishka = 0;
+            activeItems.forEach(i => {
                 const diff = (i.fakt - i.uchet) * i.price;
-                if (diff < 0) kam += diff;
-                if (diff > 0) izi += diff;
+                if (diff < 0) kamomat += diff;
+                if (diff > 0) izlishka += diff;
             });
-            document.getElementById('sumKam').innerText = kam.toLocaleString() + " so'm";
-            document.getElementById('sumIzi').innerText = "+" + izi.toLocaleString() + " so'm";
-            document.getElementById('sumSal').innerText = (kam + izi).toLocaleString() + " so'm";
+            const saldo = kamomat + izlishka;
+            document.getElementById('sumKamomat').innerText = kamomat.toLocaleString() + " so'm";
+            document.getElementById('sumIzlishka').innerText = "+" + izlishka.toLocaleString() + " so'm";
+            document.getElementById('sumSaldo').innerText = saldo.toLocaleString() + " so'm";
 
-            const c = document.getElementById('slichContainer');
-            c.innerHTML = items.map(i => {
-                const d = i.fakt - i.uchet;
-                const s = d * i.price;
-                if (d === 0) return '';
+            const container = document.getElementById('slichListContainer');
+            container.innerHTML = activeItems.map(i => {
+                const diff = i.fakt - i.uchet;
+                const sum = diff * i.price;
+                if (diff === 0) return '';
                 return `
-                    <div class="p-3 rounded-2xl border text-xs ${d < 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'} flex justify-between items-center">
+                    <div class="p-3 rounded-2xl border text-xs ${diff < 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'} flex justify-between items-center shadow-sm">
                         <div><b>${i.name}</b> <span class="text-[10px] opacity-70">(${i.otdel})</span></div>
-                        <div class="font-black"><b>${d > 0 ? '+' : ''}${d} dona</b> (${s.toLocaleString()} so'm)</div>
+                        <div class="font-black"><b>${diff > 0 ? '+' : ''}${diff} dona</b> (${sum.toLocaleString()} so'm)</div>
                     </div>
                 `;
-            }).join('') || '<p class="text-center text-slate-400 text-xs py-6">Farqlar yoʻq.</p>';
+            }).join('') || '<p class="text-center text-slate-400 text-xs py-6">Farqlar mavjud emas (Barcha qoldiq toʻgʻri).</p>';
         }
 
-        function exportExcel() {
-            if (items.length === 0) { alert("Ma'lumot yo'q!"); return; }
-            const rows = items.map(i => ({
+        function exportSlichitelniyExcel() {
+            if (activeItems.length === 0) { alert("Ma'lumot mavjud emas!"); return; }
+            const rows = activeItems.map(i => ({
                 'Material': i.id, 'Nomi': i.name, 'Otdel': i.otdel, 'Uchet': i.uchet, 'Fakt': i.fakt, 'Farq': i.fakt - i.uchet, 'Summa': (i.fakt - i.uchet) * i.price
             }));
             const ws = XLSX.utils.json_to_sheet(rows);
@@ -352,29 +444,31 @@
             XLSX.writeFile(wb, "Slichitelniy_Otchet.xlsx");
         }
 
-        function renderChart() {
-            if (items.length === 0) return;
-            const otdels = [...new Set(items.map(i => i.otdel))];
-            const sums = otdels.map(o => items.filter(i => i.otdel === o).reduce((acc, i) => acc + ((i.fakt - i.uchet) * i.price), 0));
-            const ctx = document.getElementById('myChart').getContext('2d');
-            if (chartObj) chartObj.destroy();
-            chartObj = new Chart(ctx, {
+        function renderCharts() {
+            if (activeItems.length === 0) return;
+            const otdels = [...new Set(activeItems.map(i => i.otdel))];
+            const sums = otdels.map(o => activeItems.filter(i => i.otdel === o).reduce((acc, i) => acc + ((i.fakt - i.uchet) * i.price), 0));
+            const ctx = document.getElementById('otdelChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
                 type: 'bar',
-                data: { labels: otdels, datasets: [{ label: 'Farq (so\'m)', data: sums, backgroundColor: '#3b82f6', borderRadius: 8 }] }
+                data: {
+                    labels: otdels,
+                    datasets: [{ label: 'Farq суммаси (so\'m)', data: sums, backgroundColor: '#3b82f6', borderRadius: 8 }]
+                }
             });
         }
 
-        function loadDemo() {
-            items = [
+        function loadDemoData() {
+            activeItems = [
                 { id: '101', name: 'Coca-Cola 1.5L', otdel: 'Ichimliklar', uchet: 120, fakt: 110, price: 14000 },
                 { id: '102', name: 'Non Oq', otdel: 'Non mahsulotlari', uchet: 60, fakt: 62, price: 3500 },
                 { id: '103', name: 'Shokolad Albeni', otdel: 'Qandolat', uchet: 40, fakt: 35, price: 6000 }
             ];
-            saveData();
-            updateOtdel();
+            populateOtdelDropdown();
             switchTab('lokal');
-            addHistory();
-            alert("Demo yuklandi!");
+            saveToHistory();
+            alert("Demo ma'lumotlar yuklandi!");
         }
     </script>
 </body>
