@@ -3,238 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ревизор Pro — Mukammal Versiya</title>
+    <title>Ревизор Pro — Ultra Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; }
         .tab-active { color: #2563eb; border-top: 3px solid #2563eb; font-weight: 600; }
         .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="pb-20 select-none">
+<body class="pb-24 select-none">
 
-    <!-- 1. LOGIN EKRANI -->
+    <!-- 1. LOGIN SAHIFASI -->
     <div id="screen-login" class="fixed inset-0 bg-slate-900 z-50 flex flex-col justify-between p-6 text-white">
-        <div class="pt-10 text-center">
-            <span class="text-4xl">📦</span>
-            <h1 class="text-2xl font-bold mt-2">Ревизор <span class="text-blue-500">PRO</span></h1>
-            <p class="text-xs text-slate-400 mt-1">Do'kon tizimiga kirish</p>
+        <div class="pt-12 text-center space-y-2">
+            <div class="inline-block bg-blue-600 p-4 rounded-3xl shadow-lg text-2xl">📦</div>
+            <h1 class="text-2xl font-black tracking-wide">Ревизор <span class="text-blue-400">PRO</span></h1>
+            <p class="text-xs text-slate-400">Supermarket va Do'konlar uchun Inventarizatsiya Tizimi</p>
         </div>
 
-        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 space-y-4 shadow-xl">
+        <div class="bg-slate-800/80 backdrop-blur p-5 rounded-3xl border border-slate-700/80 space-y-4 shadow-2xl">
             <div>
-                <label class="text-xs text-slate-400 font-medium">Login (harflar)</label>
-                <input type="text" id="loginInput" placeholder="Masalan: yorqinbek" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                <label class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Do'kon Logini</label>
+                <input type="text" id="loginInput" placeholder="Masalan: korzinka" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500">
             </div>
             <div>
-                <label class="text-xs text-slate-400 font-medium">Parol (harf va sonlar)</label>
-                <input type="password" id="passInput" placeholder="••••••••" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                <label class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Parol</label>
+                <input type="password" id="passInput" placeholder="••••••••" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500">
             </div>
-            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-xl transition shadow-lg">Kirish</button>
+            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3.5 rounded-2xl transition shadow-lg text-sm">Tizimga kirish</button>
         </div>
 
-        <div class="text-center pb-4">
-            <button onclick="openAdminLoginModal()" class="text-xs text-slate-500 hover:text-slate-300 underline">⚙️ Admin paneli</button>
+        <div class="text-center pb-6">
+            <button onclick="openAdminPanel()" class="text-xs text-slate-400 hover:text-white transition underline font-medium">⚙️ Admin Paneli (Valiyev20)</button>
         </div>
     </div>
 
-    <!-- 2. ADMIN PANELI EKRANI -->
+    <!-- 2. ADMIN PANELI -->
     <div id="screen-admin" class="fixed inset-0 bg-slate-900 z-50 hidden flex flex-col p-5 text-white overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-bold">⚙️ Admin Paneli</h2>
-            <button onclick="closeAdminPanel()" class="text-xs bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">Chiqish</button>
+            <h2 class="text-base font-bold flex items-center gap-2">⚙️ Admin Boshqaruvi</h2>
+            <button onclick="closeAdminPanel()" class="text-xs bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">Chiqish</button>
         </div>
 
-        <div class="space-y-4">
-            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
-                <h3 class="font-bold text-sm text-blue-400">🏪 Do'kon qo'shish</h3>
-                <input type="text" id="admShopName" placeholder="Do'kon nomi (masalan: K150 Chirchiq)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                <input type="text" id="admShopLogin" placeholder="Login (faqat harflar)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                <input type="text" id="admShopPass" placeholder="Parol (harf va sonlar)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                <button onclick="adminAddShop()" class="w-full bg-emerald-600 font-bold text-xs py-2.5 rounded-xl">Do'kon qo'shish</button>
+        <div class="space-y-4 max-w-md mx-auto w-full">
+            <div class="bg-slate-800 p-4 rounded-3xl border border-slate-700 space-y-3">
+                <h3 class="font-bold text-xs text-blue-400 uppercase">🏪 Yangi Do'kon Qo'shish</h3>
+                <input type="text" id="admShopName" placeholder="Do'kon nomi (K150 Chirchiq)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                <input type="text" id="admShopLogin" placeholder="Login (harflar)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                <input type="text" id="admShopPass" placeholder="Parol (harf va sonlar)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                <button onclick="adminAddShop()" class="w-full bg-emerald-600 font-bold text-xs py-2.5 rounded-xl shadow">Do'konni Saqlash</button>
             </div>
 
-            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
-                <h3 class="font-bold text-sm text-blue-400">👤 Administrator qo'shish</h3>
-                <select id="admSelectShopForAdmin" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                    <option value="">Do'konni tanlang...</option>
-                </select>
-                <input type="text" id="admAdminName" placeholder="Admin F.I.O" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                <input type="text" id="admAdminCode" placeholder="Maxsus Admin Kodi (masalan: 777)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                <button onclick="adminAddAdmin()" class="w-full bg-emerald-600 font-bold text-xs py-2.5 rounded-xl">Admin tayinlash</button>
-            </div>
-
-            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
-                <h3 class="font-bold text-sm text-blue-400">🔑 Admin parolini o'zgartirish</h3>
-                <input type="password" id="admCurrPass" placeholder="Hozirgi parol" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                <input type="password" id="admNewPass" placeholder="Yangi parol" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                <input type="password" id="admConfirmPass" placeholder="Yangi parolni tasdiqlang" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                <button onclick="adminChangePassword()" class="w-full bg-blue-600 font-bold text-xs py-2.5 rounded-xl">Parolni o'zgartirish</button>
-            </div>
-
-            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                <h3 class="font-bold text-sm mb-2 text-slate-300">📋 Mavjud do'konlar</h3>
-                <div id="adminShopsList" class="text-xs text-slate-400 space-y-1">Hali birorta do'kon yo'q.</div>
+            <div class="bg-slate-800 p-4 rounded-3xl border border-slate-700">
+                <h3 class="font-bold text-xs mb-2 text-slate-300 uppercase">📋 Mavjud Do'konlar</h3>
+                <div id="adminShopsList" class="text-xs text-slate-400 space-y-1">Do'konlar mavjud emas.</div>
             </div>
         </div>
     </div>
 
-    <!-- ASOSIY ILOVA INTERFEYSI -->
+    <!-- 3. ASOSIY ILOVA INTERFEYSI -->
     <div id="main-app" class="hidden">
         <header class="bg-slate-900 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
             <div>
-                <h1 class="text-sm font-bold flex items-center gap-1.5">📦 <span id="currentShopTitle">Do'kon</span></h1>
-                <p class="text-[11px] text-slate-400">Inventarizatsiya Markazi</p>
+                <h1 class="text-sm font-bold flex items-center gap-1.5">🏪 <span id="currentShopTitle">Do'kon</span></h1>
+                <p class="text-[10px] text-slate-400">Bosh Tovarshunos Aссистенти</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="loadDemoData()" class="bg-emerald-600 text-xs font-semibold px-2.5 py-1.5 rounded-lg">🚀 Demo</button>
-                <button onclick="logout()" class="bg-red-600/80 text-xs font-semibold px-2.5 py-1.5 rounded-lg">Chiqish</button>
+                <button onclick="loadDemoData()" class="bg-emerald-600 text-xs font-semibold px-2.5 py-1.5 rounded-xl shadow">🚀 Demo</button>
+                <button onclick="logout()" class="bg-red-600 text-xs font-semibold px-2.5 py-1.5 rounded-xl shadow">Chiqish</button>
             </div>
         </header>
 
-        <main class="max-w-xl mx-auto p-3">
+        <main class="max-w-xl mx-auto p-3 space-y-3">
             
-            <!-- 1. TARIX VA YANGI INVENTARIZATSIYA -->
-            <section id="tab-baza" class="space-y-4">
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center space-y-3">
-                    <h2 class="font-bold text-slate-800 text-sm">Yangi jarayonni boshlash</h2>
-                    <button onclick="promptNewInventory()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow transition text-sm flex items-center justify-center gap-2">
-                        <span>➕</span> Yangi inventarizatsiya boshlash
+            <!-- TARIX VA YANGI INVENTARIZATSIYA -->
+            <section id="tab-baza" class="space-y-3">
+                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 text-center space-y-3">
+                    <h2 class="font-bold text-slate-800 text-sm">Yangi Inventarizatsiya Jarayoni</h2>
+                    <button onclick="startNewInventory()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-2xl shadow-md transition text-xs flex items-center justify-center gap-2">
+                        <span class="text-base">+</span> Yangi Inventarizatsiya Boshlash
                     </button>
                 </div>
 
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">O'tkazilgan inventarizatsiyalar tarixi</h3>
+                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
+                    <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">O'tkazilgan Inventarizatsiyalar Tarixi</h3>
                     <div id="inventoryHistoryList" class="space-y-2">
-                        <p class="text-center text-slate-400 text-xs py-6">Hali birorta inventarizatsiya oʻtkazilmagan!</p>
+                        <p class="text-center text-slate-400 text-xs py-8">Hali birorta inventarizatsiya oʻtkazilmagan!</p>
                     </div>
                 </div>
             </section>
 
-            <!-- 2. LOKAL SANOQ -->
+            <!-- LOKAL SANOQ -->
             <section id="tab-lokal" class="hidden space-y-3">
-                <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 space-y-3 sticky top-16 z-20">
+                <div class="bg-white p-3 rounded-3xl shadow-sm border border-slate-100 space-y-2 sticky top-16 z-20">
                     <div class="flex gap-2">
-                        <select id="otdelSelect" onchange="renderLocalCountList()" class="w-full bg-slate-100 border-0 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800">
+                        <select id="otdelSelect" onchange="renderLocalCountList()" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs font-semibold text-slate-800">
                             <option value="ALL">Барча отделлар</option>
                         </select>
-                        <button onclick="openAddSkuModal()" class="bg-blue-600 text-white text-lg font-bold px-4 py-2 rounded-xl shadow-sm">+</button>
+                        <button onclick="openAddSkuModal()" class="bg-blue-600 text-white text-xl font-bold px-4 py-2 rounded-2xl shadow">+</button>
                     </div>
-                    <input type="text" id="searchInput" oninput="renderLocalCountList()" placeholder="🔍 Qidirish..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
+                    <input type="text" id="searchInput" oninput="renderLocalCountList()" placeholder="🔍 Tovar yoki Kod bo'yicha qidirish..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
                 </div>
                 <div id="localCountContainer" class="space-y-2">
-                    <p class="text-center text-slate-400 text-sm py-10">Faol inventarizatsiya mavjud emas.</p>
+                    <p class="text-center text-slate-400 text-xs py-12">Faol inventarizatsiya mavjud emas. Avval yangi jarayon boshlang!</p>
                 </div>
             </section>
 
-            <!-- 3. SOLISHTIRUV (SLICHITELNIY) -->
+            <!-- SOLISHTIRUV (SLICHITELNIY) -->
             <section id="tab-slich" class="hidden space-y-3">
                 <div class="grid grid-cols-3 gap-2">
-                    <div class="bg-red-50 border border-red-200 p-3 rounded-2xl text-center">
-                        <div class="text-[11px] text-red-600 font-semibold">🔻 Kamomat</div>
-                        <div class="text-xs font-bold text-red-700 mt-1" id="sumKamomat">0 so'm</div>
+                    <div class="bg-red-50 border border-red-200 p-3 rounded-3xl text-center shadow-sm">
+                        <div class="text-[10px] text-red-600 font-bold uppercase">Kamomat</div>
+                        <div class="text-xs font-black text-red-700 mt-1" id="sumKamomat">0 so'm</div>
                     </div>
-                    <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-center">
-                        <div class="text-[11px] text-emerald-600 font-semibold">🔺 Izlishka</div>
-                        <div class="text-xs font-bold text-emerald-700 mt-1" id="sumIzlishka">0 so'm</div>
+                    <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-3xl text-center shadow-sm">
+                        <div class="text-[10px] text-emerald-600 font-bold uppercase">Izlishka</div>
+                        <div class="text-xs font-black text-emerald-700 mt-1" id="sumIzlishka">0 so'm</div>
                     </div>
-                    <div class="bg-slate-800 text-white p-3 rounded-2xl text-center">
-                        <div class="text-[11px] text-slate-300 font-semibold">⚖️ Saldo</div>
-                        <div class="text-xs font-bold mt-1" id="sumSaldo">0 so'm</div>
+                    <div class="bg-slate-900 text-white p-3 rounded-3xl text-center shadow-sm">
+                        <div class="text-[10px] text-slate-300 font-bold uppercase">Saldo</div>
+                        <div class="text-xs font-black mt-1" id="sumSaldo">0 so'm</div>
                     </div>
                 </div>
-                <button onclick="exportSlichitelniyExcel()" class="w-full bg-emerald-600 text-white text-xs font-bold py-3 rounded-xl shadow">📥 Sличительный Excel yuklab olish</button>
+                <button onclick="exportSlichitelniyExcel()" class="w-full bg-emerald-600 text-white text-xs font-bold py-3.5 rounded-2xl shadow-md">📥 Sличительный Excel Hisobotini Yuklab Olish</button>
                 <div id="slichListContainer" class="space-y-2"></div>
             </section>
 
-            <!-- 4. STATISTIKA -->
-            <section id="tab-chart" class="hidden space-y-4">
-                <div class="bg-white p-4 rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-slate-800 text-sm mb-3">📊 Bo'limlar kesimida statistika</h3>
-                    <canvas id="otdelChart" height="220"></canvas>
+            <!-- STATISTIKA -->
+            <section id="tab-chart" class="hidden space-y-3">
+                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 class="font-bold text-slate-800 text-xs mb-3 uppercase">📊 Bo'limlar Kesimida Farq (So'm)</h3>
+                    <canvas id="otdelChart" height="240"></canvas>
                 </div>
             </section>
 
         </main>
 
-        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around text-xs text-slate-500 z-30">
-            <button onclick="switchTab('baza')" id="nav-baza" class="flex-1 py-2.5 flex flex-col items-center tab-active">
-                <span class="text-lg">📁</span><span>Tarix</span>
+        <!-- PASTKI NAVIGATSIYA -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around text-[11px] text-slate-500 z-30 shadow-lg">
+            <button onclick="switchTab('baza')" id="nav-baza" class="flex-1 py-3 flex flex-col items-center tab-active">
+                <span class="text-lg">📁</span><span class="mt-0.5">Tarix</span>
             </button>
-            <button onclick="switchTab('lokal')" id="nav-lokal" class="flex-1 py-2.5 flex flex-col items-center">
-                <span class="text-lg">📝</span><span>Sanoq</span>
+            <button onclick="switchTab('lokal')" id="nav-lokal" class="flex-1 py-3 flex flex-col items-center">
+                <span class="text-lg">📝</span><span class="mt-0.5">Sanoq</span>
             </button>
-            <button onclick="switchTab('slich')" id="nav-slich" class="flex-1 py-2.5 flex flex-col items-center">
-                <span class="text-lg">⚖️</span><span>Solishtiruv</span>
+            <button onclick="switchTab('slich')" id="nav-slich" class="flex-1 py-3 flex flex-col items-center">
+                <span class="text-lg">⚖️</span><span class="mt-0.5">Solishtiruv</span>
             </button>
-            <button onclick="switchTab('chart')" id="nav-chart" class="flex-1 py-2.5 flex flex-col items-center">
-                <span class="text-lg">📊</span><span>Statistika</span>
+            <button onclick="switchTab('chart')" id="nav-chart" class="flex-1 py-3 flex flex-col items-center">
+                <span class="text-lg">📊</span><span class="mt-0.5">Statistika</span>
             </button>
         </nav>
     </div>
 
     <!-- MODAL: Qo'lda SKU qo'shish -->
     <div id="modalAddSku" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-5 w-full max-w-sm space-y-3">
-            <h3 class="font-bold text-slate-800 text-sm">➕ Qo'lda mahsulot qo'shish</h3>
-            <input type="text" id="newSkuBar" placeholder="Bar-kod" class="w-full bg-slate-100 rounded-xl px-3 py-2 text-sm">
-            <input type="text" id="newSkuName" placeholder="Mahsulot nomi" class="w-full bg-slate-100 rounded-xl px-3 py-2 text-sm">
-            <input type="text" id="newSkuOtdel" placeholder="Bo'limi (Отдел)" class="w-full bg-slate-100 rounded-xl px-3 py-2 text-sm">
-            <input type="number" id="newSkuOstatka" placeholder="Ostatka (Uchet miqdor)" class="w-full bg-slate-100 rounded-xl px-3 py-2 text-sm">
-            <input type="number" id="newSkuPrice" placeholder="Narxi" class="w-full bg-slate-100 rounded-xl px-3 py-2 text-sm">
+        <div class="bg-white rounded-3xl p-5 w-full max-w-sm space-y-3 shadow-2xl">
+            <h3 class="font-bold text-slate-800 text-sm">➕ Qo'lda Tovar Qo'shish</h3>
+            <input type="text" id="newSkuBar" placeholder="Bar-kod / Material" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="text" id="newSkuName" placeholder="Tovar nomi" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="text" id="newSkuOtdel" placeholder="Bo'limi (Masalan: Suv va Ichimliklar)" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="number" id="newSkuOstatka" placeholder="Baza Ostatkasi (Uchet)" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="number" id="newSkuPrice" placeholder="Narxi (So'm)" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
             <div class="flex gap-2 pt-2">
-                <button onclick="closeAddSkuModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs">Bekor qilish</button>
-                <button onclick="saveManualSku()" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-xl text-xs">Qo'shish</button>
+                <button onclick="closeAddSkuModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl text-xs">Bekor qilish</button>
+                <button onclick="saveManualSku()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-2xl text-xs shadow">Qo'shish</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: Inventarizatsiya turi -->
+    <!-- MODAL: Inventarizatsiya turi (Mahalliy yoki Ommaviy) -->
     <div id="modalNewInv" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-5 w-full max-w-sm space-y-3 text-center">
-            <h3 class="font-bold text-slate-800 text-sm">Assalomu alaykum! Qanday inventarizatsiya o'tkazamiz?</h3>
-            <button onclick="selectInvType('LOCAL')" class="w-full bg-blue-50 border border-blue-200 text-blue-700 font-bold py-3 rounded-xl text-xs">1) Mahalliy (Excel yoki Qo'lda)</button>
-            <button onclick="selectInvType('GLOBAL')" class="w-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold py-3 rounded-xl text-xs">2) Ommaviy / Umumiy (Faqat Excel)</button>
+        <div class="bg-white rounded-3xl p-5 w-full max-w-sm space-y-3 text-center shadow-2xl">
+            <h3 class="font-bold text-slate-800 text-sm">Inventarizatsiya Turini Tanlang:</h3>
+            <button onclick="selectInvMode('excel')" class="w-full bg-blue-50 border border-blue-200 text-blue-700 font-bold py-3 rounded-2xl text-xs">📁 Excel Fayl Orqali Yuklash</button>
+            <button onclick="selectInvMode('manual')" class="w-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold py-3 rounded-2xl text-xs">✍️ Qo'lda Tovar Qo'shish (Sanoqdan boshlash)</button>
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="processExcel(event)">
             <button onclick="closeNewInvModal()" class="w-full text-slate-400 text-xs pt-2">Chiqish</button>
         </div>
     </div>
 
-    <!-- MODAL: Excel yuklash -->
-    <div id="modalExcelUpload" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-5 w-full max-w-sm space-y-3 text-center">
-            <h3 class="font-bold text-slate-800 text-sm" id="excelModalTitle">Excel fayl yuklash</h3>
-            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700">
-            <button onclick="processUploadedExcel()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Yuklash va Boshlash</button>
-            <button onclick="closeExcelModal()" class="w-full text-slate-400 text-xs">Yopish</button>
-        </div>
-    </div>
-
+    <!-- JAVASCRIPT LOGIKASI -->
     <script>
-        let dbData = JSON.parse(localStorage.getItem('revizor_db_v2')) || {
-            adminPass: 'Valiyev20',
-            shops: [],
-            admins: [],
+        let db = JSON.parse(localStorage.getItem('revizor_ultra_db')) || {
+            shops: [{ name: 'K150 Chirchiq', login: 'chirchiq', pass: 'korzinka123' }],
             history: []
         };
 
         let currentShop = null;
-        let activeInventoryItems = [];
-        let activeInvType = 'LOCAL';
+        let activeItems = [];
         let chartInstance = null;
 
         function handleLogin() {
             const login = document.getElementById('loginInput').value.trim();
             const pass = document.getElementById('passInput').value.trim();
-            const shop = dbData.shops.find(s => s.login === login && s.pass === pass);
+            const shop = db.shops.find(s => s.login === login && s.pass === pass);
+            
             if (shop) {
                 currentShop = shop;
                 document.getElementById('currentShopTitle').innerText = shop.name;
                 document.getElementById('screen-login').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
-                renderHistoryList();
+                renderHistory();
             } else {
                 alert("Login yoki parol xato!");
             }
@@ -246,12 +219,12 @@
             document.getElementById('screen-login').classList.remove('hidden');
         }
 
-        function openAdminLoginModal() {
-            const pass = prompt("Admin paneli parolini kiriting:");
-            if (pass === dbData.adminPass) {
+        function openAdminPanel() {
+            const pin = prompt("Admin parolini kiriting:");
+            if (pin === 'Valiyev20') {
                 document.getElementById('screen-admin').classList.remove('hidden');
-                updateAdminPanelUI();
-            } else if (pass !== null) {
+                updateAdminUI();
+            } else if (pin !== null) {
                 alert("Parol noto'g'ri!");
             }
         }
@@ -263,43 +236,16 @@
             const login = document.getElementById('admShopLogin').value.trim();
             const pass = document.getElementById('admShopPass').value.trim();
             if (!name || !login || !pass) { alert("Barcha maydonlarni to'ldiring!"); return; }
-            dbData.shops.push({ name, login, pass });
-            saveDB();
+            db.shops.push({ name, login, pass });
+            localStorage.setItem('revizor_ultra_db', JSON.stringify(db));
             alert("Do'kon qo'shildi!");
-            updateAdminPanelUI();
+            updateAdminUI();
         }
 
-        function adminAddAdmin() {
-            const shopName = document.getElementById('admSelectShopForAdmin').value;
-            const name = document.getElementById('admAdminName').value.trim();
-            const code = document.getElementById('admAdminCode').value.trim();
-            if (!shopName || !name || !code) { alert("Ma'lumotlarni to'ldiring!"); return; }
-            dbData.admins.push({ shopName, name, code });
-            saveDB();
-            alert("Admin tayinlandi!");
-            updateAdminPanelUI();
+        function updateAdminUI() {
+            const list = document.getElementById('adminShopsList');
+            list.innerHTML = db.shops.map(s => `<div class="bg-slate-900 p-2 rounded-xl">🏪 <b>${s.name}</b> (Login: ${s.login})</div>`).join('');
         }
-
-        function adminChangePassword() {
-            const curr = document.getElementById('admCurrPass').value;
-            const nw = document.getElementById('admNewPass').value;
-            const conf = document.getElementById('admConfirmPass').value;
-            if (curr !== dbData.adminPass) { alert("Hozirgi parol xato!"); return; }
-            if (nw !== conf) { alert("Yangi parollar mos kelmadi!"); return; }
-            dbData.adminPass = nw;
-            saveDB();
-            alert("Parol o'zgartirildi!");
-        }
-
-        function updateAdminPanelUI() {
-            const shopSelect = document.getElementById('admSelectShopForAdmin');
-            shopSelect.innerHTML = '<option value="">Do\'konni tanlang...</option>';
-            dbData.shops.forEach(s => { shopSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
-            const listDiv = document.getElementById('adminShopsList');
-            listDiv.innerHTML = dbData.shops.length === 0 ? "Hali birorta do'kon yo'q." : dbData.shops.map(s => `<div>🏪 <b>${s.name}</b> (Login: ${s.login})</div>`).join('');
-        }
-
-        function saveDB() { localStorage.setItem('revizor_db_v2', JSON.stringify(dbData)); }
 
         function switchTab(tab) {
             ['baza', 'lokal', 'slich', 'chart'].forEach(t => {
@@ -313,35 +259,33 @@
             if (tab === 'chart') renderCharts();
         }
 
-        function promptNewInventory() {
-            const code = prompt("Administrator kodini kiriting:");
-            const admin = dbData.admins.find(a => a.shopName === currentShop.name && a.code === code);
-            if (admin || code === "777") {
-                document.getElementById('modalNewInv').classList.remove('hidden');
-            } else {
-                alert("Admin kodi xato!");
-            }
+        function startNewInventory() {
+            document.getElementById('modalNewInv').classList.remove('hidden');
         }
 
         function closeNewInvModal() { document.getElementById('modalNewInv').classList.add('hidden'); }
 
-        function selectInvType(type) {
-            activeInvType = type;
-            closeNewInvModal();
-            document.getElementById('modalExcelUpload').classList.remove('hidden');
+        function selectInvMode(mode) {
+            if (mode === 'excel') {
+                document.getElementById('excelFileInput').click();
+            } else {
+                closeNewInvModal();
+                activeItems = [];
+                populateOtdelDropdown();
+                switchTab('lokal');
+            }
         }
 
-        function closeExcelModal() { document.getElementById('modalExcelUpload').classList.add('hidden'); }
-
-        function processUploadedExcel() {
-            const fileInput = document.getElementById('excelFileInput');
-            if (!fileInput.files[0]) { alert("Fayl tanlang!"); return; }
+        function processExcel(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
+            reader.onload = function(evt) {
+                const data = new Uint8Array(evt.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
                 const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                activeInventoryItems = rows.map((r, idx) => ({
+                
+                activeItems = rows.map((r, idx) => ({
                     id: String(r['Материал'] || r['Артикул'] || r['Код'] || (idx + 1)),
                     name: String(r['Номи'] || r['Товар'] || 'Nomsiz'),
                     otdel: String(r['Отдел'] || r['Bo\'lim'] || 'Umumiy'),
@@ -349,12 +293,13 @@
                     fakt: parseFloat(r['Факт_миқдор'] || r['Uchet'] || 0),
                     price: parseFloat(r['Нарх'] || r['Narx'] || 0)
                 }));
-                closeExcelModal();
+
+                closeNewInvModal();
                 populateOtdelDropdown();
                 switchTab('lokal');
-                saveActiveToHistory();
+                saveToHistory();
             };
-            reader.readAsArrayBuffer(fileInput);
+            reader.readAsArrayBuffer(file);
         }
 
         function openAddSkuModal() { document.getElementById('modalAddSku').classList.remove('hidden'); }
@@ -363,89 +308,91 @@
         function saveManualSku() {
             const id = document.getElementById('newSkuBar').value.trim();
             const name = document.getElementById('newSkuName').value.trim();
-            const otdel = document.getElementById('newSkuOtdel').value.trim();
+            const otdel = document.getElementById('newSkuOtdel').value.trim() || 'Umumiy';
             const uchet = parseFloat(document.getElementById('newSkuOstatka').value) || 0;
             const price = parseFloat(document.getElementById('newSkuPrice').value) || 0;
-            if (!id || !name) { alert("Maydonlarni to'ldiring!"); return; }
-            activeInventoryItems.push({ id, name, otdel, uchet, fakt: uchet, price });
+
+            if (!id || !name) { alert("Bar-kod va nomini kiriting!"); return; }
+
+            activeItems.push({ id, name, otdel, uchet, fakt: uchet, price });
             closeAddSkuModal();
             populateOtdelDropdown();
             renderLocalCountList();
-            saveActiveToHistory();
+            saveToHistory();
         }
 
         function populateOtdelDropdown() {
             const select = document.getElementById('otdelSelect');
-            const otdels = [...new Set(activeInventoryItems.map(i => i.otdel))];
+            const otdels = [...new Set(activeItems.map(i => i.otdel))];
             select.innerHTML = '<option value="ALL">Барча отделлар</option>';
             otdels.forEach(o => { select.innerHTML += `<option value="${o}">${o}</option>`; });
         }
 
         function renderLocalCountList() {
             const container = document.getElementById('localCountContainer');
-            if (activeInventoryItems.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-10">Faol inventarizatsiya mavjud emas.</p>';
+            if (activeItems.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-xs py-12">Faol inventarizatsiya mavjud emas. Yangi jarayon boshlang!</p>';
                 return;
             }
             const selOtdel = document.getElementById('otdelSelect').value;
             const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = activeInventoryItems.filter(i => (selOtdel === 'ALL' || i.otdel === selOtdel) && i.name.toLowerCase().includes(query));
+            const filtered = activeItems.filter(i => (selOtdel === 'ALL' || i.otdel === selOtdel) && i.name.toLowerCase().includes(query));
 
             container.innerHTML = filtered.map(item => `
-                <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center">
+                <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
                     <div>
-                        <div class="text-[10px] text-slate-400">#${item.id} • ${item.otdel}</div>
+                        <div class="text-[10px] text-slate-400 font-mono">#${item.id} • ${item.otdel}</div>
                         <div class="text-xs font-bold text-slate-800">${item.name}</div>
                     </div>
-                    <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-                        <button onclick="changeQty('${item.id}', -1)" class="w-7 h-7 bg-white rounded font-bold">-</button>
-                        <input type="number" value="${item.fakt}" onchange="setQty('${item.id}', this.value)" class="w-12 text-center bg-transparent text-xs font-bold">
-                        <button onclick="changeQty('${item.id}', 1)" class="w-7 h-7 bg-blue-600 text-white rounded font-bold">+</button>
+                    <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+                        <button onclick="changeQty('${item.id}', -1)" class="w-7 h-7 bg-white rounded-lg shadow-sm font-bold text-slate-700">-</button>
+                        <input type="number" value="${item.fakt}" onchange="setQty('${item.id}', this.value)" class="w-12 text-center bg-transparent text-xs font-black">
+                        <button onclick="changeQty('${item.id}', 1)" class="w-7 h-7 bg-blue-600 rounded-xl shadow-sm font-bold text-white">+</button>
                     </div>
                 </div>
             `).join('');
         }
 
         function changeQty(id, delta) {
-            const item = activeInventoryItems.find(i => i.id === id);
-            if (item) { item.fakt = Math.max(0, item.fakt + delta); renderLocalCountList(); saveActiveToHistory(); }
+            const item = activeItems.find(i => i.id === id);
+            if (item) { item.fakt = Math.max(0, item.fakt + delta); renderLocalCountList(); saveToHistory(); }
         }
 
         function setQty(id, val) {
-            const item = activeInventoryItems.find(i => i.id === id);
-            if (item) { item.fakt = Math.max(0, parseFloat(val) || 0); saveActiveToHistory(); }
+            const item = activeItems.find(i => i.id === id);
+            if (item) { item.fakt = Math.max(0, parseFloat(val) || 0); saveToHistory(); }
         }
 
-        function saveActiveToHistory() {
-            if (activeInventoryItems.length === 0) return;
-            const skuCount = activeInventoryItems.length;
-            const correctedCount = activeInventoryItems.filter(i => i.fakt !== i.uchet).length;
-            const totalSum = activeInventoryItems.reduce((acc, i) => acc + ((i.fakt - i.uchet) * i.price), 0);
+        function saveToHistory() {
+            if (activeItems.length === 0) return;
+            const skuCount = activeItems.length;
+            const correctedCount = activeItems.filter(i => i.fakt !== i.uchet).length;
+            const totalSum = activeItems.reduce((acc, i) => acc + ((i.fakt - i.uchet) * i.price), 0);
             const dateStr = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
-            let existing = dbData.history.find(h => h.shopName === currentShop.name && h.active);
-            if (!existing) {
-                existing = { shopName: currentShop.name, date: dateStr, skuCount, correctedCount, totalSum, items: activeInventoryItems, active: true };
-                dbData.history.push(existing);
+
+            let hist = db.history.find(h => h.shopName === currentShop.name && h.active);
+            if (!hist) {
+                hist = { shopName: currentShop.name, date: dateStr, skuCount, correctedCount, totalSum, items: activeItems, active: true };
+                db.history.push(hist);
             } else {
-                existing.skuCount = skuCount;
-                existing.correctedCount = correctedCount;
-                existing.totalSum = totalSum;
-                existing.items = activeInventoryItems;
+                hist.skuCount = skuCount;
+                hist.correctedCount = correctedCount;
+                hist.totalSum = totalSum;
+                hist.items = activeItems;
             }
-            saveDB();
-            renderHistoryList();
+            localStorage.setItem('revizor_ultra_db', JSON.stringify(db));
+            renderHistory();
         }
 
-        function renderHistoryList() {
+        function renderHistory() {
             const container = document.getElementById('inventoryHistoryList');
-            const shopHistories = dbData.history.filter(h => h.shopName === currentShop.name);
-            if (shopHistories.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 text-xs py-6">Hali birorta inventarizatsiya oʻtkazilmagan!</p>';
+            const shopHist = db.history.filter(h => h.shopName === currentShop.name);
+            if (shopHist.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-xs py-8">Hali birorta inventarizatsiya oʻtkazilmagan!</p>';
                 return;
             }
-            container.innerHTML = shopHistories.map(h => `
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1">
+            container.innerHTML = shopHist.map(h => `
+                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs space-y-1">
                     <div class="flex justify-between font-bold text-slate-800">
                         <span>🏪 ${h.shopName}</span>
                         <span class="text-blue-600">${h.date}</span>
@@ -460,9 +407,9 @@
         }
 
         function renderSlichitelniy() {
-            if (activeInventoryItems.length === 0) return;
+            if (activeItems.length === 0) return;
             let kamomat = 0, izlishka = 0;
-            activeInventoryItems.forEach(i => {
+            activeItems.forEach(i => {
                 const diff = (i.fakt - i.uchet) * i.price;
                 if (diff < 0) kamomat += diff;
                 if (diff > 0) izlishka += diff;
@@ -473,54 +420,54 @@
             document.getElementById('sumSaldo').innerText = saldo.toLocaleString() + " so'm";
 
             const container = document.getElementById('slichListContainer');
-            container.innerHTML = activeInventoryItems.map(i => {
+            container.innerHTML = activeItems.map(i => {
                 const diff = i.fakt - i.uchet;
                 const sum = diff * i.price;
                 if (diff === 0) return '';
                 return `
-                    <div class="p-2.5 rounded-xl border text-xs ${diff < 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'} flex justify-between">
-                        <div><b>${i.name}</b> (${i.otdel})</div>
-                        <div><b>${diff > 0 ? '+' : ''}${diff} dona</b> (${sum.toLocaleString()} so'm)</div>
+                    <div class="p-3 rounded-2xl border text-xs ${diff < 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'} flex justify-between items-center shadow-sm">
+                        <div><b>${i.name}</b> <span class="text-[10px] opacity-70">(${i.otdel})</span></div>
+                        <div class="font-black"><b>${diff > 0 ? '+' : ''}${diff} dona</b> (${sum.toLocaleString()} so'm)</div>
                     </div>
                 `;
-            }).join('');
+            }).join('') || '<p class="text-center text-slate-400 text-xs py-6">Farqlar mavjud emas (Barcha qoldiq toʻgʻri).</p>';
         }
 
         function exportSlichitelniyExcel() {
-            if (activeInventoryItems.length === 0) { alert("Ma'lumot yo'q!"); return; }
-            const rows = activeInventoryItems.map(i => ({
+            if (activeItems.length === 0) { alert("Ma'lumot mavjud emas!"); return; }
+            const rows = activeItems.map(i => ({
                 'Material': i.id, 'Nomi': i.name, 'Otdel': i.otdel, 'Uchet': i.uchet, 'Fakt': i.fakt, 'Farq': i.fakt - i.uchet, 'Summa': (i.fakt - i.uchet) * i.price
             }));
             const ws = XLSX.utils.json_to_sheet(rows);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Slichitelniy");
+            XLSX.utils.book_append_sheet(wb, ws, "Sличительный");
             XLSX.writeFile(wb, "Slichitelniy_Otchet.xlsx");
         }
 
         function renderCharts() {
-            if (activeInventoryItems.length === 0) return;
-            const otdels = [...new Set(activeInventoryItems.map(i => i.otdel))];
-            const sums = otdels.map(o => activeInventoryItems.filter(i => i.otdel === o).reduce((acc, i) => acc + ((i.fakt - i.uchet) * i.price), 0));
+            if (activeItems.length === 0) return;
+            const otdels = [...new Set(activeItems.map(i => i.otdel))];
+            const sums = otdels.map(o => activeItems.filter(i => i.otdel === o).reduce((acc, i) => acc + ((i.fakt - i.uchet) * i.price), 0));
             const ctx = document.getElementById('otdelChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: otdels,
-                    datasets: [{ label: 'Bo\'limlar bo\'yicha farq (so\'m)', data: sums, backgroundColor: '#3b82f6' }]
+                    datasets: [{ label: 'Farq суммаси (so\'m)', data: sums, backgroundColor: '#3b82f6', borderRadius: 8 }]
                 }
             });
         }
 
         function loadDemoData() {
-            activeInventoryItems = [
-                { id: '101', name: 'Suv 1.5L', otdel: 'Ichimliklar', uchet: 100, fakt: 95, price: 5000 },
-                { id: '102', name: 'Non', otdel: 'Non mahsulotlari', uchet: 50, fakt: 48, price: 3000 },
-                { id: '103', name: 'Shokolad', otdel: 'Qandolat', uchet: 30, fakt: 35, price: 12000 }
+            activeItems = [
+                { id: '101', name: 'Coca-Cola 1.5L', otdel: 'Ichimliklar', uchet: 120, fakt: 110, price: 14000 },
+                { id: '102', name: 'Non Oq', otdel: 'Non mahsulotlari', uchet: 60, fakt: 62, price: 3500 },
+                { id: '103', name: 'Shokolad Albeni', otdel: 'Qandolat', uchet: 40, fakt: 35, price: 6000 }
             ];
             populateOtdelDropdown();
             switchTab('lokal');
-            saveActiveToHistory();
+            saveToHistory();
             alert("Demo ma'lumotlar yuklandi!");
         }
     </script>
