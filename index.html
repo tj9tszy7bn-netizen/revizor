@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ревизор Pro — Ultra Edition</title>
+    <title>Ревизор Pro — Perfect Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -11,65 +11,55 @@
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; }
         .tab-active { color: #2563eb; border-top: 3px solid #2563eb; font-weight: 600; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="pb-24 select-none">
 
-    <!-- 1. LOGIN SAHIFASI -->
+    <!-- LOGIN EKRANI -->
     <div id="screen-login" class="fixed inset-0 bg-slate-900 z-50 flex flex-col justify-between p-6 text-white">
         <div class="pt-12 text-center space-y-2">
             <div class="inline-block bg-blue-600 p-4 rounded-3xl shadow-lg text-2xl">📦</div>
             <h1 class="text-2xl font-black tracking-wide">Ревизор <span class="text-blue-400">PRO</span></h1>
-            <p class="text-xs text-slate-400">Supermarket va Do'konlar uchun Inventarizatsiya Tizimi</p>
+            <p class="text-xs text-slate-400">Chirchiq Oʻrmon — K150</p>
         </div>
 
-        <div class="bg-slate-800/80 backdrop-blur p-5 rounded-3xl border border-slate-700/80 space-y-4 shadow-2xl">
+        <div class="bg-slate-800 p-5 rounded-3xl border border-slate-700 space-y-4 shadow-2xl">
             <div>
-                <label class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Do'kon Logini</label>
-                <input type="text" id="loginInput" placeholder="Masalan: korzinka" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                <label class="text-[11px] text-slate-400 font-semibold uppercase">Login</label>
+                <input type="text" id="loginInput" value="chirchiq" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none">
             </div>
             <div>
-                <label class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Parol</label>
-                <input type="password" id="passInput" placeholder="••••••••" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                <label class="text-[11px] text-slate-400 font-semibold uppercase">Parol</label>
+                <input type="password" id="passInput" value="korzinka123" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none">
             </div>
             <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3.5 rounded-2xl transition shadow-lg text-sm">Tizimga kirish</button>
         </div>
 
         <div class="text-center pb-6">
-            <button onclick="openAdminPanel()" class="text-xs text-slate-400 hover:text-white transition underline font-medium">⚙️ Admin Paneli (Valiyev20)</button>
+            <button onclick="openAdminPanel()" class="text-xs text-slate-400 hover:text-white underline">⚙️ Admin Paneli (Valiyev20)</button>
         </div>
     </div>
 
-    <!-- 2. ADMIN PANELI -->
+    <!-- ADMIN PANELI -->
     <div id="screen-admin" class="fixed inset-0 bg-slate-900 z-50 hidden flex flex-col p-5 text-white overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-base font-bold flex items-center gap-2">⚙️ Admin Boshqaruvi</h2>
+            <h2 class="text-base font-bold">⚙️ Admin Boshqaruvi</h2>
             <button onclick="closeAdminPanel()" class="text-xs bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">Chiqish</button>
         </div>
-
         <div class="space-y-4 max-w-md mx-auto w-full">
             <div class="bg-slate-800 p-4 rounded-3xl border border-slate-700 space-y-3">
-                <h3 class="font-bold text-xs text-blue-400 uppercase">🏪 Yangi Do'kon Qo'shish</h3>
-                <input type="text" id="admShopName" placeholder="Do'kon nomi (K150 Chirchiq)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                <input type="text" id="admShopLogin" placeholder="Login (harflar)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                <input type="text" id="admShopPass" placeholder="Parol (harf va sonlar)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                <button onclick="adminAddShop()" class="w-full bg-emerald-600 font-bold text-xs py-2.5 rounded-xl shadow">Do'konni Saqlash</button>
-            </div>
-
-            <div class="bg-slate-800 p-4 rounded-3xl border border-slate-700">
-                <h3 class="font-bold text-xs mb-2 text-slate-300 uppercase">📋 Mavjud Do'konlar</h3>
-                <div id="adminShopsList" class="text-xs text-slate-400 space-y-1">Do'konlar mavjud emas.</div>
+                <h3 class="font-bold text-xs text-blue-400 uppercase">🏪 Do'konlar</h3>
+                <div id="adminShopsList" class="text-xs text-slate-300 space-y-2"></div>
             </div>
         </div>
     </div>
 
-    <!-- 3. ASOSIY ILOVA INTERFEYSI -->
+    <!-- ASOSIY INTERFEYS -->
     <div id="main-app" class="hidden">
         <header class="bg-slate-900 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
             <div>
-                <h1 class="text-sm font-bold flex items-center gap-1.5">🏪 <span id="currentShopTitle">Do'kon</span></h1>
-                <p class="text-[10px] text-slate-400">Bosh Tovarshunos Aссистенти</p>
+                <h1 class="text-sm font-bold flex items-center gap-1.5">🏪 <span id="currentShopTitle">Chirchiq O'rmon</span></h1>
+                <p class="text-[10px] text-slate-400">Bosh Tovarshunos: Yorqinbek</p>
             </div>
             <div class="flex gap-2">
                 <button onclick="loadDemoData()" class="bg-emerald-600 text-xs font-semibold px-2.5 py-1.5 rounded-xl shadow">🚀 Demo</button>
@@ -78,25 +68,26 @@
         </header>
 
         <main class="max-w-xl mx-auto p-3 space-y-3">
-            
-            <!-- TARIX VA YANGI INVENTARIZATSIYA -->
             <section id="tab-baza" class="space-y-3">
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 text-center space-y-3">
-                    <h2 class="font-bold text-slate-800 text-sm">Yangi Inventarizatsiya Jarayoni</h2>
-                    <button onclick="startNewInventory()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-2xl shadow-md transition text-xs flex items-center justify-center gap-2">
-                        <span class="text-base">+</span> Yangi Inventarizatsiya Boshlash
+                    <h2 class="font-bold text-slate-800 text-sm">Yangi Inventarizatsiya</h2>
+                    <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="processExcel(event)">
+                    <button onclick="document.getElementById('excelFileInput').click()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-2xl shadow-md text-xs flex items-center justify-center gap-2">
+                        <span>📁</span> Excel Faylni Yuklash (MB52)
+                    </button>
+                    <button onclick="startManualInventory()" class="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-2xl shadow-md text-xs flex items-center justify-center gap-2">
+                        <span>✍️</span> Qo'lda Sanoqdan Boshlash
                     </button>
                 </div>
 
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">O'tkazilgan Inventarizatsiyalar Tarixi</h3>
+                    <h3 class="font-bold text-slate-800 text-xs uppercase">O'tkazilgan Inventarizatsiyalar Tarixi</h3>
                     <div id="inventoryHistoryList" class="space-y-2">
                         <p class="text-center text-slate-400 text-xs py-8">Hali birorta inventarizatsiya oʻtkazilmagan!</p>
                     </div>
                 </div>
             </section>
 
-            <!-- LOKAL SANOQ -->
             <section id="tab-lokal" class="hidden space-y-3">
                 <div class="bg-white p-3 rounded-3xl shadow-sm border border-slate-100 space-y-2 sticky top-16 z-20">
                     <div class="flex gap-2">
@@ -105,14 +96,13 @@
                         </select>
                         <button onclick="openAddSkuModal()" class="bg-blue-600 text-white text-xl font-bold px-4 py-2 rounded-2xl shadow">+</button>
                     </div>
-                    <input type="text" id="searchInput" oninput="renderLocalCountList()" placeholder="🔍 Tovar yoki Kod bo'yicha qidirish..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
+                    <input type="text" id="searchInput" oninput="renderLocalCountList()" placeholder="🔍 Qidirish..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
                 </div>
                 <div id="localCountContainer" class="space-y-2">
-                    <p class="text-center text-slate-400 text-xs py-12">Faol inventarizatsiya mavjud emas. Avval yangi jarayon boshlang!</p>
+                    <p class="text-center text-slate-400 text-xs py-12">Faol inventarizatsiya mavjud emas.</p>
                 </div>
             </section>
 
-            <!-- SOLISHTIRUV (SLICHITELNIY) -->
             <section id="tab-slich" class="hidden space-y-3">
                 <div class="grid grid-cols-3 gap-2">
                     <div class="bg-red-50 border border-red-200 p-3 rounded-3xl text-center shadow-sm">
@@ -132,42 +122,31 @@
                 <div id="slichListContainer" class="space-y-2"></div>
             </section>
 
-            <!-- STATISTIKA -->
             <section id="tab-chart" class="hidden space-y-3">
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
-                    <h3 class="font-bold text-slate-800 text-xs mb-3 uppercase">📊 Bo'limlar Kesimida Farq (So'm)</h3>
+                    <h3 class="font-bold text-slate-800 text-xs mb-3 uppercase">📊 Bo'limlar Kesimida Farq</h3>
                     <canvas id="otdelChart" height="240"></canvas>
                 </div>
             </section>
-
         </main>
 
-        <!-- PASTKI NAVIGATSIYA -->
         <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around text-[11px] text-slate-500 z-30 shadow-lg">
-            <button onclick="switchTab('baza')" id="nav-baza" class="flex-1 py-3 flex flex-col items-center tab-active">
-                <span class="text-lg">📁</span><span class="mt-0.5">Tarix</span>
-            </button>
-            <button onclick="switchTab('lokal')" id="nav-lokal" class="flex-1 py-3 flex flex-col items-center">
-                <span class="text-lg">📝</span><span class="mt-0.5">Sanoq</span>
-            </button>
-            <button onclick="switchTab('slich')" id="nav-slich" class="flex-1 py-3 flex flex-col items-center">
-                <span class="text-lg">⚖️</span><span class="mt-0.5">Solishtiruv</span>
-            </button>
-            <button onclick="switchTab('chart')" id="nav-chart" class="flex-1 py-3 flex flex-col items-center">
-                <span class="text-lg">📊</span><span class="mt-0.5">Statistika</span>
-            </button>
+            <button onclick="switchTab('baza')" id="nav-baza" class="flex-1 py-3 flex flex-col items-center tab-active"><span class="text-lg">📁</span><span class="mt-0.5">Tarix</span></button>
+            <button onclick="switchTab('lokal')" id="nav-lokal" class="flex-1 py-3 flex flex-col items-center"><span class="text-lg">📝</span><span class="mt-0.5">Sanoq</span></button>
+            <button onclick="switchTab('slich')" id="nav-slich" class="flex-1 py-3 flex flex-col items-center"><span class="text-lg">⚖️</span><span class="mt-0.5">Solishtiruv</span></button>
+            <button onclick="switchTab('chart')" id="nav-chart" class="flex-1 py-3 flex flex-col items-center"><span class="text-lg">📊</span><span class="mt-0.5">Statistika</span></button>
         </nav>
     </div>
 
-    <!-- MODAL: Qo'lda SKU qo'shish -->
+    <!-- MODAL: SKU Qo'shish -->
     <div id="modalAddSku" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl p-5 w-full max-w-sm space-y-3 shadow-2xl">
-            <h3 class="font-bold text-slate-800 text-sm">➕ Qo'lda Tovar Qo'shish</h3>
-            <input type="text" id="newSkuBar" placeholder="Bar-kod / Material" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <h3 class="font-bold text-slate-800 text-sm">➕ Tovar Qo'shish</h3>
+            <input type="text" id="newSkuBar" placeholder="Bar-kod" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
             <input type="text" id="newSkuName" placeholder="Tovar nomi" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
-            <input type="text" id="newSkuOtdel" placeholder="Bo'limi (Masalan: Suv va Ichimliklar)" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
-            <input type="number" id="newSkuOstatka" placeholder="Baza Ostatkasi (Uchet)" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
-            <input type="number" id="newSkuPrice" placeholder="Narxi (So'm)" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="text" id="newSkuOtdel" placeholder="Bo'limi" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="number" id="newSkuOstatka" placeholder="Baza Ostatkasi" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
+            <input type="number" id="newSkuPrice" placeholder="Narxi" class="w-full bg-slate-100 border-0 rounded-2xl px-3 py-2.5 text-xs">
             <div class="flex gap-2 pt-2">
                 <button onclick="closeAddSkuModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl text-xs">Bekor qilish</button>
                 <button onclick="saveManualSku()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-2xl text-xs shadow">Qo'shish</button>
@@ -175,21 +154,9 @@
         </div>
     </div>
 
-    <!-- MODAL: Inventarizatsiya turi (Mahalliy yoki Ommaviy) -->
-    <div id="modalNewInv" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-5 w-full max-w-sm space-y-3 text-center shadow-2xl">
-            <h3 class="font-bold text-slate-800 text-sm">Inventarizatsiya Turini Tanlang:</h3>
-            <button onclick="selectInvMode('excel')" class="w-full bg-blue-50 border border-blue-200 text-blue-700 font-bold py-3 rounded-2xl text-xs">📁 Excel Fayl Orqali Yuklash</button>
-            <button onclick="selectInvMode('manual')" class="w-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold py-3 rounded-2xl text-xs">✍️ Qo'lda Tovar Qo'shish (Sanoqdan boshlash)</button>
-            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="processExcel(event)">
-            <button onclick="closeNewInvModal()" class="w-full text-slate-400 text-xs pt-2">Chiqish</button>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT LOGIKASI -->
     <script>
-        let db = JSON.parse(localStorage.getItem('revizor_ultra_db')) || {
-            shops: [{ name: 'K150 Chirchiq', login: 'chirchiq', pass: 'korzinka123' }],
+        let db = JSON.parse(localStorage.getItem('revizor_perfect_db')) || {
+            shops: [{ name: "Chirchiq O'rmon", login: 'chirchiq', pass: 'korzinka123' }],
             history: []
         };
 
@@ -201,7 +168,6 @@
             const login = document.getElementById('loginInput').value.trim();
             const pass = document.getElementById('passInput').value.trim();
             const shop = db.shops.find(s => s.login === login && s.pass === pass);
-            
             if (shop) {
                 currentShop = shop;
                 document.getElementById('currentShopTitle').innerText = shop.name;
@@ -223,29 +189,13 @@
             const pin = prompt("Admin parolini kiriting:");
             if (pin === 'Valiyev20') {
                 document.getElementById('screen-admin').classList.remove('hidden');
-                updateAdminUI();
+                document.getElementById('adminShopsList').innerHTML = db.shops.map(s => `<div class="bg-slate-900 p-3 rounded-xl">🏪 <b>${s.name}</b><br><span class="text-slate-400 text-[10px]">Login: ${s.login} | Parol: ${s.pass}</span></div>`).join('');
             } else if (pin !== null) {
                 alert("Parol noto'g'ri!");
             }
         }
 
         function closeAdminPanel() { document.getElementById('screen-admin').classList.add('hidden'); }
-
-        function adminAddShop() {
-            const name = document.getElementById('admShopName').value.trim();
-            const login = document.getElementById('admShopLogin').value.trim();
-            const pass = document.getElementById('admShopPass').value.trim();
-            if (!name || !login || !pass) { alert("Barcha maydonlarni to'ldiring!"); return; }
-            db.shops.push({ name, login, pass });
-            localStorage.setItem('revizor_ultra_db', JSON.stringify(db));
-            alert("Do'kon qo'shildi!");
-            updateAdminUI();
-        }
-
-        function updateAdminUI() {
-            const list = document.getElementById('adminShopsList');
-            list.innerHTML = db.shops.map(s => `<div class="bg-slate-900 p-2 rounded-xl">🏪 <b>${s.name}</b> (Login: ${s.login})</div>`).join('');
-        }
 
         function switchTab(tab) {
             ['baza', 'lokal', 'slich', 'chart'].forEach(t => {
@@ -259,21 +209,10 @@
             if (tab === 'chart') renderCharts();
         }
 
-        function startNewInventory() {
-            document.getElementById('modalNewInv').classList.remove('hidden');
-        }
-
-        function closeNewInvModal() { document.getElementById('modalNewInv').classList.add('hidden'); }
-
-        function selectInvMode(mode) {
-            if (mode === 'excel') {
-                document.getElementById('excelFileInput').click();
-            } else {
-                closeNewInvModal();
-                activeItems = [];
-                populateOtdelDropdown();
-                switchTab('lokal');
-            }
+        function startManualInventory() {
+            activeItems = [];
+            populateOtdelDropdown();
+            switchTab('lokal');
         }
 
         function processExcel(e) {
@@ -294,7 +233,6 @@
                     price: parseFloat(r['Нарх'] || r['Narx'] || 0)
                 }));
 
-                closeNewInvModal();
                 populateOtdelDropdown();
                 switchTab('lokal');
                 saveToHistory();
@@ -331,7 +269,7 @@
         function renderLocalCountList() {
             const container = document.getElementById('localCountContainer');
             if (activeItems.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 text-xs py-12">Faol inventarizatsiya mavjud emas. Yangi jarayon boshlang!</p>';
+                container.innerHTML = '<p class="text-center text-slate-400 text-xs py-12">Hali tovarlar qoʻshilmagan. Yuqoridagi [+] tugmasini bosing.</p>';
                 return;
             }
             const selOtdel = document.getElementById('otdelSelect').value;
@@ -380,7 +318,7 @@
                 hist.totalSum = totalSum;
                 hist.items = activeItems;
             }
-            localStorage.setItem('revizor_ultra_db', JSON.stringify(db));
+            localStorage.setItem('revizor_perfect_db', JSON.stringify(db));
             renderHistory();
         }
 
@@ -430,7 +368,7 @@
                         <div class="font-black"><b>${diff > 0 ? '+' : ''}${diff} dona</b> (${sum.toLocaleString()} so'm)</div>
                     </div>
                 `;
-            }).join('') || '<p class="text-center text-slate-400 text-xs py-6">Farqlar mavjud emas (Barcha qoldiq toʻgʻri).</p>';
+            }).join('') || '<p class="text-center text-slate-400 text-xs py-6">Farqlar mavjud emas.</p>';
         }
 
         function exportSlichitelniyExcel() {
